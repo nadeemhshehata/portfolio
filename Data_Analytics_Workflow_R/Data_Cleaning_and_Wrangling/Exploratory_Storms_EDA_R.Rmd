@@ -1,0 +1,778 @@
+---
+title: "Assignment 1: Exploring the Storms"
+author: "Nadeem Hassan"
+date: "Due October 1st"
+output:
+  pdf_document: default
+editor_options:
+  chunk_output_type: inline
+---
+
+```{r active="", eval=FALSE}
+# BEGIN ASSIGNMENT 
+```
+```{r setup, include=FALSE, message=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(tidymodels)
+library(stringr)
+library(scales)
+library(ggrepel)
+library(patchwork)
+library(ggthemes)
+library(ggridges)
+
+```
+
+These assignments are intended to guide you through working with real data. They are also an exercise in **following instructions**. Each code cell asks you to create an R object with a specific name, and the autograder will check to see if that object's properties match the solution. Do not change the names of the objects, and make sure that the object you create answers the question exactly.
+
+***
+
+# Part 1: Overview of the `storms` Data
+
+We will work with the `storms` data set that is part of the `dplyr` package. Take a moment to read through the help file (`?storms`, after loading `dplyr`).
+
+The `storms` data from NOAA Atlantic hurricane database, measured every 6 hours during the lifetime of a storm.
+
+In the following code chunk, use `select()` to extract *only* the numerical, character, and factor variables, respecively, in the dataframe.
+
+```{r BasicInfo0, error=TRUE, tags=c()}
+# Select the numerical columns (aka variables)
+(numerical_var <- storms
+  # YOUR CODE HERE
+ %>%select(where(is.factor))
+)
+
+# Select the character columns
+(char_var <- storms
+  # YOUR CODE HERE
+ %>%select(where(is.character))
+)
+
+# Select the "factor" columns
+(factor_var <- storms
+  # YOUR CODE HERE
+  %>% select(where(is.factor))
+)
+```
+One thing you may have noticed is that `category` has integer values, but is of `double` type. We can see this by checking the `distinct()` values for the `category` variable.
+
+```{r BasicInfo1, error=TRUE, tags=c()}
+(distinct_cat <- storms
+  # YOUR CODE HERE
+ %>%distinct(category)
+)
+```
+```{r}
+. = ottr::check("tests/BasicInfo1.R")
+```
+
+We will later create a new **ordinal** variable (R's `<fctr>` type) to capture the same information.
+
+# Basic Explorations
+
+Let's get a rough idea of the whole data set, such as the time period and the (rough) total number of storms recorded. Here we follow the reasonable idea that the storms are uniquely determined by the `year` and `name`.
+
+In the following code chunk, create a data frame with columns labelled `start_year`, `end_year`, and `count` (in that order).
+
+```{r error=TRUE, tags=c()}
+(storm_rough <- storms %>%
+  # Find the start_year, end_year, and count of the storms data, by name
+  # YOUR CODE HERE
+   group_by(year, name) %>%
+  summarise(
+    start_year = min(year),
+    end_year = max(year),
+    count = n(),
+    .groups = "drop"
+  ) %>%
+    summarise(
+    start_year = min(start_year),  
+    end_year = max(end_year), 
+    count = n()                    
+  ) 
+   
+   
+  #arrange(start_year) %>%
+  #select(start_year, end_year, count)
+)
+
+#row.names(storm_rough) <- NULL
+
+#str(storm_rough)
+
+
+```
+```{r}
+. = ottr::check("tests/RoughIdea0.R")
+```
+
+We can summarize other variables by year to see their ranges, such as storm strength (in terms of wind speed) and the latitudes storms go to in each year.
+
+In the following code chunk, find the lowest and highest values for the wind speed and for the latitude *for each year* (you do not need to also find the count of distinct values for this question). The data frame should have columns `min_wind`, `max_wind`, `min_lat`, and `max_lat`, and one row for each `year` in the data set.
+
+```{r error=TRUE, tags=c()}
+(storm_range <- storms %>%
+  # Find the min_wind, max_wind, min_lat, and max_lat for each year.
+  # YOUR CODE HERE
+   group_by(year) %>%
+  summarise(
+    min_wind = min(wind, na.rm = TRUE),
+    max_wind = max(wind, na.rm = TRUE),
+    min_lat = min(lat, na.rm = TRUE),
+    max_lat = max(lat, na.rm = TRUE)
+ 
+)
+)
+```
+```{r}
+. = ottr::check("tests/RoughIdea1.R")
+```
+
+## `category` and `status`
+
+Learn about how the `category` corresponds to the `status`, which is something like a **covariance** between two **categorical** variables, using `geom_count()`. Make sure that `category` is on the x-axis.
+
+```{r error=TRUE, tags=c()}
+cat_status_plot <- ggplot(storms, aes(x = category, y = status)) +
+  geom_count() +
+  labs(x = "Category", y = "Status", title = "Category vs. Status")
+  # Plot the count of each storm status by category
+  # YOUR CODE HERE
+cat_status_plot
+
+ 
+
+```
+```{r}
+. = ottr::check("tests/ReviewDataS.R")
+```
+
+The plot does not seem to be interesting since all the dots are on the same row, **BUT** read the `Warning` message shown on top of the plot:
+
+- `Removed 14382 rows containing non-finite values`
+
+From previous outputs, we see that there must be `NA` values for `category` corresponding to other `status` values. So, it actually indicates:
+
+- `category` is only assigned for `"hurricane"`s
+
+Also, from the sizes of the dots, it conforms to the expectation that higher categories contain fewer number of hurricanes.
+
+## Review the data and make adjustments
+
+We are not experts in hurricanes, but with enough data and enough time to mess around, we can learn quite a bit. For instance, plotting `status` v.s. `wind` speed could inform us of how the storms are classified, besides the actual `status` names that already contain some information. In your solution, use `geom_jitter()` with transparency set to 20% to reduce overplotting.
+
+```{r error=TRUE, tags=c()}
+status_wind_labels <- labs(
+  x = "Maximum sustained wind speed (knot)",
+  y = "Storm status, with no particular order",
+  title = "The status of a storm provides information on the wind speed",
+  subtitle = "Disturbance, tropical wave, extratropical and other low are not clear-cut",
+  caption = "Data from dplyr::storms"
+)
+
+set.seed(100) 
+
+status_wind_plot <- storms
+  # Plot the (jittered) points of status versus wind
+  # YOUR CODE HERE
+ 
+  status_wind_plot <- ggplot(storms, aes(x = wind, y = status)) +
+  geom_jitter(alpha = 0.2) +
+  status_wind_labels
+  #labs(
+    #x = "wind",
+    #y = "Maximum sustained wind speed (knot)",
+    #title = "Wind Speed of Storm"
+  #)
+  status_wind_plot
+  
+
+```
+```{r}
+. = ottr::check("tests/ReviewData.R")
+```
+
+Based on the plot, explain how hurricanes are defined. Which categories are clearly defined by wind speed, and which are not?
+
+\# YOUR ANSWER HERE
+Hurricanes are defined by the Saffir-Simpson scale, which categorizes them by wind speed. Categories 1 and 5 are clearly defined, while categories 2 and 3 overlap, making them less distinct.
+
+**One issue**: There appears to be a `"tropical storm"` with a `hurricane` strength `wind`.
+
+Check it out by filtering for a `"tropical storm"` that has wind speed that is strictly larger than `65`. The result should still be a data frame with all of the columns, but a single row.
+
+```{r error=TRUE, tags=c()}
+(wrong_status <- storms |>
+  filter(
+    # Just the offending storm
+    # YOUR CODE HERE
+    status == "tropical storm" & wind > 65
+  )
+)
+```
+```{r}
+. = ottr::check("tests/ReviewData0.R")
+```
+
+So it is storm `Emily` in `2005`. Let's find out more about the particular storm, by filtering for all the rows about the storm named `Emily` in `2005`. The result should be a data frame with several rows, all of which correspond to `Emily` in `2005`. 
+
+```{r error=TRUE, tags=c()}
+(emily_2005 <- storms
+  # Just the offending storm, using the name and year
+  # YOUR CODE HERE
+ %>%
+  filter(name == "Emily" & year == 2005)
+)
+```
+```{r}
+. = ottr::check("tests/ReviewData1.R")
+```
+
+Looks like the offending entry is the last one before `Emily` ceased to have hurricane wind strength. We'll chalk it up with data input error. 
+
+We can re-make the previous plot, colouring `Emily` observations `red`, and label the offending record by `Emily` using `geom_label_repel()`.
+
+
+
+
+
+```{r error=TRUE, tags=c()}
+emily_label <- labs(
+  x = "Maximum sustained wind speed (knot)",
+  y = "Storm status, with no particular order",
+  title = "The status of a storm provides information on the wind speed",
+  subtitle = "With storm Emily in 2005 highlighted and the wrong point labeled",
+  caption = "Data from dplyr::storms"
+)
+label_emily_plot <- storms |>
+  filter(
+    # retain everything *except* the offending hurricane.
+    # YOUR CODE HERE
+    !(name == "Emily" & year == 2005) 
+)
+  # Make the same plot as before
+  # YOUR CODE HERE
+  label_emily_plot <- ggplot(label_emily_plot, aes(x = wind, y = status)) +
+    geom_point(alpha = 0.5) +  
+    geom_label_repel(
+    # Add a label for the hurricane in `wrong_status`
+    # YOUR CODE HERE
+    data = wrong_status,
+      #filter(storms, name == "Wrong_Storm" & year == 2005),  
+    aes(label = name),
+    color = "blue"
+  ) +
+   
+  geom_point(
+    data = filter(storms, name == "Emily" & year == 2005),  
+    #emily_2005,
+    colour = "red"
+  ) +
+  scale_x_continuous(
+    breaks = seq(10, 170, 20)
+  ) +
+  emily_label
+
+```
+```{r}
+. = ottr::check("tests/ReviewData2.R")
+```
+
+To make sure that we found the offending case, we can replot the thing filtering out that particular row.
+
+Remake the original plot with the single offending row removed.
+
+```{r error=TRUE, tags=c()}
+replot_no_emily_label <- labs(
+    x = "Maximum sustained wind speed (knot)",
+    y = "Storm status, with no particular order",
+    title = "The status of a storm provides information on the wind speed",
+    subtitle = "With mistaken input from storm Emily 2005 removed",
+    caption = "Data from storms dataframe"
+)
+(replot_no_emily_plot <- storms
+  # Remove the offending storm, then plot
+  # YOUR CODE HERE
+  |>
+  filter(!(name == "Emily" & year == 2005 & month == 7 & day == 20 & hour == 18)) |>  
+  ggplot(aes(x = wind, y = status)) +
+  geom_jitter(alpha = 0.2) +
+  replot_no_emily_label
+)
+```
+```{r}
+. = ottr::check("tests/ReviewData3.R")
+```
+
+We can also change the particular row, instead of throwing it out, using the `if_else()` function.
+
+```{r error=TRUE}
+# nothing to change in this code chunk
+(new_storms <- storms |>
+  mutate(
+    status = if_else(
+      condition = (name == "Emily") & (year == 2005) & (month == 7) & (day == 20) & (hour == 18),
+      true = "hurricane",
+      false = status
+    ),
+    category = if_else(
+      condition = (name == "Emily") & (year == 2005) & (month == 7) & (day == 20) & (hour == 18),
+      true = 1,
+      false = category
+    )
+  )
+)
+```
+
+Now we'll make a new variable `factor_cat` with levels from `0` up to `5`, and assign level `0` when the value of `category` is *missing*.
+
+```{r error=TRUE}
+# nothing to change here
+(new2_storms <- new_storms |>
+  mutate(
+    factor_cat = factor(
+      if_else(
+        condition = is.na(category),
+        true = 0,
+        false = category),
+      ordered = TRUE,
+      levels = c(0, 1, 2, 3, 4, 5)
+    ) # create `factor_cat` to be category as <ord> type
+  )
+)
+```
+
+**Comment**: `if_else(condition, true, false)` is a function that computes the `condition` first, and if the `condition` evaluates to `TRUE` it returns the `true` output; while if the `condition` evaluates to `FALSE`, it returns the `false` output.
+
+After this,
+
+- `new2_storms` has the *correct* information concerning `status` and `wind` speed, as far as we understand,
+- the `factor_cat` variable in `new2_storms` is of `<ord>` (ordered categorical) type, with the same information as the `category` variable.
+
+We can plot it and label where the corrected data point for `Emily` goes in red again.
+
+You plot should plot the data *without* the incorrect row using `geom_jitter()` with 20% transparency, then add the `geom_label_repel()` for the corrected value for emily, then add the point (`geom_point()`) for the corrected value of Emily.
+
+```{r error=TRUE, tags=c()}
+correct_emily <- new2_storms |>
+  filter(( (name == "Emily") & (year == 2005) & (month == 7) & (day == 20) & (hour == 18)))
+
+(correct_emily_plot <- new2_storms
+  # Remove the offending storm, then plot
+  # YOUR CODE HERE
+  |>
+  filter(!(name == "Emily" & year == 2005 & month == 7 & day == 20 & hour == 18)) |>
+  ggplot(aes(x = wind, y = status)) +
+  geom_jitter(alpha = 0.2) + 
+  geom_label_repel(
+    data = correct_emily, 
+    aes(label = name),
+    color = "blue"
+  ) +
+  geom_point(
+    data = correct_emily, 
+    colour = "red"
+  ) +
+  # Now plot the offending storm in red (not jittered).
+  # The offending storm should have *just* the offending observation labelled with geom_label_repel.
+  # YOUR CODE HERE
+  labs(
+    x = "Maximum sustained wind speed (knot)",
+    y = "Storm status, with no particular order",
+    title = "The status of a storm provides information on the wind speed",
+    subtitle = "With storm Emily 2005 CORRECTED, highlighted and labeled",
+    caption = "Data from storms dataframe"
+)
+)
+```
+```{r}
+. = ottr::check("tests/ReviewData4.R")
+```
+
+Using `geom_density_ridges()` shows distributions better than just the scatter plot. Fill in the aesthetics of the plot, with `wind` on the x-axis and use `status` as the y value, fill, *and* colour.
+
+```{r error=TRUE, tags=c()}
+(ridges_plot <- new2_storms |>
+  ggplot(
+    mapping = aes(
+      # Plot the status versus wind, coloured and filled by status
+      # YOUR CODE HERE
+      x = wind,       
+      y = status, 
+      colour = status,
+      fill = status
+    )
+  ) +
+  geom_density_ridges(
+    alpha = 0.5,
+    show.legend = FALSE
+  ) +
+  scale_x_continuous(breaks = seq(10, 170, 20)) +
+  labs(
+    x = "Maximum sustained wind speed (knot)",
+    y = "Storm status, with no particular order",
+    title = "The status of a storm provides rough information on the wind speed",
+    caption = "Data from storms dataframe"
+   )
+)
+```
+```{r}
+. = ottr::check("tests/ReviewData5.R")
+```
+
+## Simple learning from the data
+
+Using similar method, we can see the definition of the `category` of a hurricane -- even though a simple google or `?storms` would already give us the information. First issue is that the `category` is NOT a categorical variable and plotting using it causes various issues. Luckily, we already have a categorical variable `factor_cat` carrying the same information.
+
+**Comment**: We are not using the full power of a `factor` type variable here. We will come back to `factor` later.
+
+For the `hurricane`s, we compare the output of `geom_jitter()` and `geom_density_ridges()` plots of the category `factor_cat` against `wind` speed.
+
+```{r error=TRUE, tags=c()}
+category_plot_labels <- labs(
+    x = "wind speed (knot)",
+    y = "Saffir-Simpson hurricane category",
+    title = "Wind speed determines category",
+    caption = "Data from storms dataframe"
+)
+
+(category_jitter_plot <- new2_storms
+  # Only "hurricane"s
+  # YOUR CODE HERE
+  |>
+  filter(status == "hurricane")
+  |> ggplot(
+    mapping = aes(
+      # x, y, and colour
+      # YOUR CODE HERE
+      x = wind,                  
+      y = factor_cat,            
+      colour = factor_cat
+    )
+  ) +
+  # Jitter points (with 20% transparency) and add labels
+  # YOUR CODE HERE
+  geom_jitter(alpha = 0.2) +      
+  category_plot_labels +
+  theme(legend.position = "bottom") +
+  guides(
+    colour = guide_legend(
+      title = "Category",
+      nrow = 1
+    )
+  )
+)
+
+(category_ridges_plot <- new2_storms
+  # Same plot as above, but as a ridgeline plot.
+  # Be sure to set the fill *and* colour aesthetics!
+  # Make the points 50% transparent and don't show a legend.
+  # YOUR CODE HERE
+  |>
+  filter(status == "hurricane") |>  
+  ggplot(
+    mapping = aes(
+      x = wind,                   
+      y = factor_cat,             
+      fill = factor_cat,          
+      colour = factor_cat         
+    )
+  ) +
+  geom_density_ridges(alpha = 0.5, show.legend = FALSE) +  
+  category_plot_labels +           
+  theme(legend.position = "none") 
+)
+
+#category_jitter_plot + category_ridges_plot
+```
+```{r}
+. = ottr::check("tests/SimpleLearning0.R")
+```
+
+The jittering that we used makes it possible to see how many points are in each part of the plot, but it artificially makes them look boxed in. Explain how the plot looks when you use `geom_point()` instead of jitter (your submitted solution should use `geom_jitter()`, but investigate with `geom_point()`). Using this knowledge, explain whether the pattern is the true data or the result of humans inputting data manually (and how).
+
+\# YOUR ANSWER HERE
+Using geom_point() shows the actual data points without jittering, making them overlap and create dense clusters. This suggests that the pattern may not reflect true variations but rather indicates how people often report storm data in whole numbers, leading to many identical values.
+
+We can get more details concerning the criteria, even if we know nothing *a priori* about what the rules are, by finding the boundaries defining each category. We can group the data by the values in `category`, then find the maximal and minimal of the `wind` value for each group, then order the resulting rows in increasing order of the `category`. Label the columns `min_wind` and `min_wind`.
+
+```{r error=TRUE, tags=c()}
+(new2_storms_summary <- new2_storms
+  # Find the `min_wind` and `max_wind` in each category
+  # YOUR CODE HERE
+  |>
+  group_by(category) |>   
+  summarise(
+    min_wind = min(wind, na.rm = TRUE), 
+    max_wind = max(wind, na.rm = TRUE)   
+  ) |>
+  arrange(category)  
+)
+```
+```{r}
+. = ottr::check("tests/SimpleLearning1.R")
+```
+
+It is commonly said that the strength of a storm is related to the air pressure. We can see whether this is true by using simple boxplot or ridgeline plot. It indeed justifies what we hear. 
+
+When interpreting storms with cetgory 0, note that the *standard atmospheric pressure* is slightly above $1$ bar, (at $1.01325$ bar, see [the Wikipedia](https://en.wikipedia.org/wiki/Bar_(unit))).
+
+```{r error=TRUE, tags=c()}
+pressure_plot_x_scale <- scale_x_continuous(
+  labels = label_number(scale = 1/1000),
+)
+
+pressure_plot_labels <- labs(
+  x = "Atmospherical pressure (bars)",
+  y = "Saffir-Simpson hurricane category",
+  title = "Low pressure means strong storms",
+  caption = "Data from storms dataframe"
+)
+
+(pressure_box_plot <- new2_storms |>
+  ggplot(
+    # Set x and y aesthetics
+    # YOUR CODE HERE
+    mapping = aes(
+      x = pressure,  
+      y = factor_cat  
+    )
+  ) +
+  # Make a boxplot
+  # YOUR CODE HERE
+  geom_boxplot(alpha = 0.5) +  
+  pressure_plot_labels +
+  pressure_plot_x_scale
+)
+
+(pressure_ridges_plot <- new2_storms
+  # Define a ridgeline plot.
+  # Set the x and y aesthetics
+  # Set 50% transparency and don't show the legend.
+  # Add the labels and x_scale.
+  # YOUR CODE HERE
+|>
+  ggplot(
+    mapping = aes(
+      x = pressure,  
+      y = factor_cat, 
+      #fill = factor_cat  
+    )
+  ) +
+  geom_density_ridges(alpha = 0.5, show.legend = FALSE) + 
+  pressure_plot_labels +
+  pressure_plot_x_scale
+)
+
+#pressure_box + pressure_ridges
+```
+```{r}
+. = ottr::check("tests/SimpleLearning2.R")
+```
+
+Some averages don't make sense, at least not obviously. For example, the following computes the average strength for wind speed recorded in each year.
+
+```{r error=TRUE}
+# nothing to change here
+new_storms |>
+  summarize(
+    mean_wind = mean(wind, na.rm = TRUE),
+    .by = year
+  )
+```
+
+Low averages could be low for many reasons. For instance, maybe more low speeds are kept in the record for some years than others. Moreover, it is the strongest wind speed that do most of the damages, which can not be reflected by the average alone.
+
+## Getting more details on individual storms
+
+Looking at individual storms:
+
+- Storms are named individually in each year, while the same name may be reused across different years.
+
+We will take the difference between the `first_day` and the `last_day` as the length of the storm, even though there might be exceptions to this rule.
+
+First, `summarize()` by individual storms.
+
+```{r error=TRUE}
+# nothing to change here
+library(lubridate)
+storms_by_storm <- new2_storms |>
+  mutate(
+    date = make_date(year, month, day)  # <- from lubridate package
+  ) |>
+  summarize(
+    first_day = min(date),
+    last_day = max(date),
+    days = n_distinct(month, day), # gives the actual number of days
+    max_cat = replace_na(max(category), 0), # this is numerical
+    med_cat = replace_na(median(category),0),
+    factor_max_cat = max(factor_cat),
+    max_wind = max(wind),
+    median_wind = median(wind, na.rm = TRUE),
+    avg_hu_diam = mean(hurricane_force_diameter, na.rm = TRUE),
+    max_hu_diam = max(hurricane_force_diameter),
+    min_pressure = min(pressure, na.rm = TRUE),
+    median_pressure = median(pressure, na.rm = TRUE),
+    .by = c(year, name)
+  )
+glimpse(storms_by_storm)
+```
+
+We can look at the number of storms in each year using a bar diagram, coloured to gain details on maximal strength as `factor_max_cat`.
+
+```{r error=TRUE, tags=c()}
+storm_count_labels <- labs(
+  x = "Year, 1975 -- 2021",
+  y = "Number of storms in a year",
+  title = "Upward trend of storms and their intensity from 1975 to 2021",
+  subtitle = "With natural variations throughout the years",
+  caption = "Data from storms dataframe"
+)
+
+(storm_count_plot <- storms_by_storm |>
+  ggplot(
+    # Set the x aesthetic
+    # YOUR CODE HERE
+    mapping = aes(
+      x = year,
+      #y = ..count..,
+      fill = factor_max_cat 
+    )
+  ) +
+  # Make a bar plot, setting the colour to black
+  # YOUR CODE HERE
+  geom_bar(
+    #stat = "count",
+    colour = "black") +
+  scale_fill_discrete(name = "Maximal category") +
+  storm_count_labels
+)
+```
+```{r}
+. = ottr::check("tests/MoreIndividual0.R")
+```
+
+In an individual year (e.g. 2021), we can try to visualize the duration of storms, including their maximal strengths.
+
+```{r error=TRUE, tags=c()}
+set_year <- 2021
+
+storm_in_year_labels <-
+  labs(
+    x = "Date",
+    y = "Storm name",
+    title = str_c("Duration and maximal category for storms in ", as.character(set_year)),
+    caption = "Data from storms dataframe"
+)
+
+(storms_in_year_plot <- storms_by_storm
+  # Filter to only the given year (do not hardcode the year!)
+  # YOUR CODE HERE
+  |> filter(year == set_year)
+  |> ggplot(aes(x = first_day, y = name, colour = factor(max_cat))  
+  
+    # Name on the y axis, first day of the storm on the x.
+    # Colour by maximum category
+    # YOUR CODE HERE
+  ) +
+  geom_point() +
+  geom_segment(
+    # Set the xend and yend aesthetics
+    # YOUR CODE HERE
+    aes(xend = last_day, yend = name),  
+    size = 1
+  ) +
+  scale_x_date(
+    name = NULL,
+    date_labels = "%b"
+  ) +
+  scale_colour_brewer(
+    name = "Maximal category",
+    palette = "Set1"
+  ) +
+  storm_in_year_labels
+)
+```
+```{r}
+. = ottr::check("tests/MoreIndividual1.R")
+```
+
+We can also look at the number of storms in terms of their lifetime duration, together with the information on the maximal category they reached by a bar chart.
+
+```{r error=TRUE, tags=c()}
+duration_vs_category_bar_labels <-
+  labs(
+    x = "Lifetime of storms (days)",
+    y = "Number of storms",
+    title = "Stronger storms tend to last longer",
+    subtitle = "Or, it takes time for a storm to become strong",
+    caption = "Data from storms dataframe"
+)
+
+(duration_vs_category_bar_plot <- storms_by_storm |>
+  ggplot(
+    # set the x aesthetic
+    # YOUR CODE HERE
+    mapping = aes(
+    x = days,
+    fill = factor(factor_max_cat))
+  ) +
+  # Make a bar chart
+  # YOUR CODE HERE
+  geom_bar(colour = "black") +  
+  theme(legend.position = "bottom") +
+  guides(
+    fill = guide_legend(
+      title = "Maximal category",
+      nrow = 1
+    )
+  ) +
+  duration_vs_category_bar_labels
+)
+```
+```{r}
+. = ottr::check("tests/MoreIndividual2.R")
+```
+
+We can also visualize these data with a combined boxplot and ridges plot:
+
+```{r error=TRUE, tags=c()}
+duration_vs_category_labels <-
+  labs(
+    x = "Lifetime of storms (days)",
+    y = "Maximal category a storm reaches",
+    title = "Stronger storms tend to last longer",
+    subtitle = "Or, it takes time for a storm to become strong",
+    caption = "Data from storms dataframe"
+  )
+
+(box_ridges_combined_plot <- storms_by_storm
+  |> ggplot(mapping = aes(x = days, y = factor_max_cat)) +
+  # Add a boxplot
+  # Add the ridgeline plot (it will need a fill aesthetic, set alpha to 0.3)
+  # YOUR CODE HERE
+  geom_boxplot(aes(fill = factor(factor_max_cat)), alpha = 0.5) +
+  geom_density_ridges(aes(fill = factor(factor_max_cat)), alpha = 0.3) +
+  theme(legend.position = "bottom") +
+  guides(
+    fill = guide_legend(
+      title = "Maximal category",
+      nrow = 1,
+      label.position = "top"
+    )
+  ) +
+  duration_vs_category_labels
+)
+```
+```{r}
+. = ottr::check("tests/MoreIndividual3.R")
+```
+
+Congratulations on finishing this assignment!
+
+There is plenty more that can be done with these data - including much more exploration and some basic modelling - but that will be left for another day!
+
+```{r active="", eval=FALSE}
+# END ASSIGNMENT 
+```

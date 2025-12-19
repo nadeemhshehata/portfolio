@@ -1,0 +1,134 @@
+---
+title: "DATA 100 Quiz 6"
+author: "Nadeem Hassan"
+---
+# Student Name: Nadeem Hassan
+N9093285
+
+# SETUP
+
+1) Import the Olympics.csv dataset. Recall that this file gives information on over 270,000 athlete's and their results from previous Summer and Winter Olympic Games  Once the code is run, the dataset can be referred to as "Olympic_games" for the remainder of the quiz.
+
+2) Run the following code to load the tidyverse package.
+
+```{r}
+library(tidyverse)
+```
+
+4) Run the following code to load the dataset and to make the transformation.
+
+```{r}
+olympic_games <- read_csv("https://raw.githubusercontent.com/sukhjitsehra/datasets/master/DATA100/Datasets/Olympics.csv", col_types = cols(Sport = col_factor())) |>
+                 mutate(Medal = fct_na_value_to_level(Medal)) # This gives missing values an explicit factor level, ensuring that they appear in summaries and on plots.
+
+glimpse(olympic_games)
+```
+
+*Question 1*
+
+Complete each of the following tasks separately using individual/single functions from the `stringr` package.
+
+(a) Find the total number of athletes whose names start with a vowel (i.e., one of "AEIOUaeiou").
+
+(b) Find the number of times (i.e. count) that "Robert Tait McKenzie" has played in the Olympics.
+
+_Hint: Use the `sum(...)` and `str_count(COLUMN_NAME, PATTERN)` functions to add up the results._
+
+_Points:_ 4
+
+```{r}
+#Part a)
+library(stringr)
+count_vowels <- sum(str_detect(olympic_games$Name, "^[AEIOUaeiou]"))
+# YOUR CODE HERE
+count_vowels
+
+#Part b)
+count_name <- sum(str_count(olympic_games$Name, "Robert Tait McKenzie")) # YOUR CODE HERE
+count_name
+
+```
+```{r}
+. = ottr::check("tests/q1.R")
+```
+
+*Question 2*
+
+(a) Write R code to create a new data set named "olympic_games_agegroup":
+
+  + use `mutate(...)` function to create a new variable called "Age_Group" that is created using a `str_sub(...)` function then embedded within `str_c(...)` function that contains the first character of each observation in "Age" followed by "0s" (e.g. if an athlete is aged 24 will then be represented by 20s in Age_Group, etc.), and then
+
+  + use `select(...)` function to selects the "Name", "Team", "Season", and "Age_Group" columns (in this order) from the dataset.
+
+_Hint: Use `str_sub(VARIABLE_NAME, 1, 1)` function to extract the first number then embedded within `str_c(SUB_STRING_1, SUB_STRING_2)` function to concatenate to strings._
+
+(b) Now, use `filter(...)` function to filter observations for team "Canada" and "Age_group" is not "NA" from "olympic_games_agegroup" dataset, and then use a pipe to create a bar chart for the "Age_Group" variable for each "Season".
+
+_Recall: include `+ facet_wrap(~Season)` after the `geom_bar(...)` function to create bar charts for the age groups in each season._
+
+_Points:_ 6
+
+```{r}
+#Part (a)
+olympic_games_agegroup <-  olympic_games %>%
+  mutate(Age_Group = str_c(str_sub(as.character(Age), 1, 1), "0s")) %>% 
+  select(Name, Team, Season, Age_Group) # YOUR CODE HERE
+olympic_games_agegroup
+
+#Part (b)
+plot_age_group_canada <- olympic_games_agegroup %>%
+  filter(Team == "Canada", !is.na(Age_Group)) %>%  
+  ggplot(aes(x = Age_Group)) +
+  geom_bar() +
+  facet_wrap(~Season) + 
+  labs(title = "Age Group Distribution of Canadian Athletes by Season", x = "Age Group", y = "Count")
+ # YOUR CODE HERE
+plot_age_group_canada
+```
+```{r}
+. = ottr::check("tests/q2.R")
+```
+
+*Question 3*
+
+Complete each of the following using the "forcats" package along with (where necessary) the "dplyr" and "ggplot" packages in R.
+
+a) Report the number of levels in "Sport" variable in the "olympic_games" data set.  
+
+b) Use "mutate(...)" to add a new variable called "Result" to "olympic_games" (call the new data set "olympic_games_2") that expresses each Gold medal winner as "Champion", each Silver and Bronze medal winner as a "Medallist", and each "NA" as a "Competitor". 
+
+_Hint: Use `Result = fct_collapse(COLUMN_NAME, "NEW_LEVEL_NAME_1"=c("LEVEL_1", "LEVEL_2"), "NEW_LEVEL_NAME_2"=c("LEVEL_3", "LEVEL_4"), "NEW_LEVEL_NAME_3"=c(NA))` and embed it to `mutate(...)` function to create a new column "Result". You can use `?fct_collapse` in the Console to look up more information._
+
+_Points:_ 5
+
+```{r}
+#Part a)
+number_of_levels_in_sport <- nlevels(olympic_games$Sport) # YOUR CODE HERE
+number_of_levels_in_sport
+
+#Part b)
+olympic_games_2 <- olympic_games %>%
+  mutate(Result = fct_collapse(Medal,
+                               Champion = "Gold",
+                               Medallist = c("Silver", "Bronze"),
+                               Competitor = c(NA)))  # Collapse levels 
+
+ # YOUR CODE HERE
+glimpse(olympic_games_2)
+
+olympic_games_2
+```
+
+```{r}
+. = ottr::check("tests/q3.R")
+```
+
+That concludes the sixth quiz for DATA100. To hand in your quiz for grading:
+
+1) Make sure that you have not changed any of the given variable names.
+
+2) Once you have answered all the questions and finished working on RMD file, then do run the all code chunks in the Rmd file and save this file on your lab computer.
+
+3) Go to Gradescope lab quiz and upload this RMD file to the appropriate location. 
+
+That's it! Once submitted, proceed to this week's worksheet and work on it for the remaining part of the lab session. Although you may not finish it here today, you are expected to continue working on it throughout the week and to have a good understanding of the material by next week's quiz!

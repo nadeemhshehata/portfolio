@@ -1,0 +1,718 @@
+---
+title: 'DATA100 R Worksheet 2: Data Visualization and Transformation: Exploratory Data Analysis'
+author: "Nadeem Hassan"
+date: "Last compiled on `r format(Sys.time(), '%d %B, %Y')`"
+output:
+  html_document:
+    theme: readable
+    toc: yes
+    number_sections: true
+---
+
+```{r setup, include=FALSE, echo=FALSE}
+knitr::opts_chunk$set(include = TRUE)
+```
+
+# Data Visualization and Transformation: Exploratory Data Analysis
+
+```{asis directions=TRUE, language="asis"}
+*Saving RMD file in DATA100 Lab Working Directory*
+  
+Use the following steps to setup RStudio working directory:
+    1. "File -> Save As" in the toolbar above and save it to the DATA100 folder that you created in last week. 
+    2. From RStudio, use the menu to change your working directory under Session -> Set Working Directory -> Choose Directory.
+    3. Choose the directory you've just created in step 1.
+You will want to do this each time you open a DATA100 file in RStudio.
+
+*Motive*
+
+This worksheet intends to introduce to some of the functions in the dplyr package in R (which we will continue to look at next week) and further familiarize you with the ggplot2 package from last week.
+
+*Additional Notes*
+
+i) Any of the "white" areas in this file (called an R notebook or markdown file) are where text can be input into the document.
+
+ii) Any of the "grey" areas are where R code is entered (called "code chunks"). To execute any of the code chunks, push the run button (looks like a "play" button) in the top right of the code chunk. Alternatively, "Ctrl+Shift+Enter" will also run the code chunk.
+
+iii) Code chunks will always start with '''{r} and end with '''.  If necessary, to insert a code chunk you can click on "Insert" along the toolbar and choose R or "Ctrl+Alt+I".  For writing R code for exercises, you need to insert code chunks under the exercise question. 
+
+BE SURE TO SAVE YOUR WORK AS YOUR PROGRESS THROUGH THIS FILE. IF YOU HAVE ANY QUESTIONS OR DIFFICULTIES WITH THE EXAMPLES AND EXERCISES, PLEASE EMAIL ME AT XMA@WLU.CA
+```
+
+## Loading 'tidyverse'
+
+The majority of the discussion would be on tidyverse package within R designed for use in Data Science. To load the tidyverse package (which contains the dplyr package we will be discussing today), run the following code:
+
+[Note: If you are using your laptop and loading the tidyverse for the first time, you will need to type `install.packages("tidyverse")` in a line before library(tidyverse).]
+
+```{r}
+library(tidyverse)
+```
+
+## Importing Datasets
+
+Import the following datasets into R:
+
+- "GTA_Apt_Rentals_2018 dataset": Use the link ("https://raw.githubusercontent.com/sukhjitsehra/datasets/master/DATA100/Datasets/GTA_Apt_Rentals_2018.csv") to load the dataset into R session and name the dataset as "gta_rentals".
+
+- "google_play_store" dataset: This gives information on over 10,000 apps available in the Google Play Store. Use the link ("https://raw.githubusercontent.com/sukhjitsehra/datasets/master/DATA100/Datasets/google_play_store.csv") to load the dataset into R session and name the dataset as "google_play_store". 
+
+- "baby_names" dataset: This is an archive of baby names in the US from 1880 to 2014 (it's a large file!). Use the link ("https://raw.githubusercontent.com/sukhjitsehra/datasets/master/DATA100/Datasets/baby_names.csv") to load the dataset into R session and name the dataset as "baby_names".
+
+After importing, to view either dataset just type their NAME (e.g. google_play_store), or glimpse(NAME) or use View(NAME). Notice that gta_rentals have only 1124 records, whereas google_play_store has 10840 rows (which are the apps) and 13 columns/variables - click the black play buttons along the top row where the variables are listed to cycle through the 13 columns. Whereas baby_names has 5 columns/variables but 1,825,433 rows for the names (Wow, so many records!!!).
+
+```{r}
+# Load GTA_Apt_Rentals_2018 dataset into R session from URL
+gta_rentals <- read_csv("https://raw.githubusercontent.com/sukhjitsehra/datasets/master/DATA100/Datasets/GTA_Apt_Rentals_2018.csv")
+
+# To view dataset in a transposed version of print(): Here columns run down the page, and data runs across
+glimpse(gta_rentals)
+
+# Load google_play_store dataset into R session from URL
+google_play_store <- read_csv("https://raw.githubusercontent.com/sukhjitsehra/datasets/master/DATA100/Datasets/google_play_store.csv")
+
+# To view google_play_store dataset 
+glimpse(google_play_store)
+
+# Load baby_names dataset in R session from URL
+baby_names <- read_csv("https://raw.githubusercontent.com/sukhjitsehra/datasets/master/DATA100/Datasets/baby_names.csv")
+
+# To view baby_names dataset
+glimpse(baby_names)
+```
+
+## PART 1: MORE ON GGPLOT2
+
+- With exploratory data analysis (EDA) is often the first step to visualizing and transforming your data. Assessing variation requires examining the values of a variable as they change from measurement to measurement.
+
+- Graphs generated through EDA are distinct from the final graphs. You will typically generate dozens of exploratory graphs in the course of analyzing a dataset and end up publishing one or two in a final format. 
+
+- One purpose of EDA is to develop a personal understanding of the data, so all your code and graphs should be geared towards that purpose.
+
+Let's take an initial look at the Greater Toronto Area apartments (gta_rentals) dataset by creating several plots to see how the data can be visualized and then summarise the data.
+
+*Exercise 1*
+
+Use ggplot(...) to create bar charts for:
+a) the Bedrooms data
+b) the Bathrooms data 
+c) use the summary(...) function to calculate some descriptive statistics of the Bedrooms and Bathrooms data of gta_rentals dataset.
+
+[Recall: ggplot(DATA_SET_NAME) + geom_FUNCTION(aes(x=X_VARIABLE,y=Y_VARIABLE)) from Worksheet 1 - see the worksheet for more details. ]
+
+[Hint: There is no y variable to be stated in a bar chart.]
+
+Add Code R chunk here to write the code. 
+```{r solution=TRUE, tags=c()}
+# YOUR CODE HERE
+```
+
+Now, as you have the initial visualizations and summarizing. Therefore, you should start asking yourself some relatively simple questions about the data (and also be considering whether these answers are what you would expect). Examples of such questions are below. Use the bar charts and summaries to answer them in the space provided.
+
+a) In terms of the number of bedrooms, which type of apartment appears to be most common?
+
+b) In terms of the number of bathrooms, which type of apartment appears to be most common?
+    
+c) In terms of the number of bathrooms and bedrooms, what would you guess is the most common type of apartment?
+    
+d) What do the bar charts suggest about the skewness of the data for the number of bedrooms and bathrooms?
+    
+e) What is the mean number of bedrooms in an apartment?  What is the median number?
+    
+f) What is the mean number of bathrooms in an apartment?  What is the median number?
+
+g) Can your answers to parts e) and f) be used to further strengthen your answer to part d)?
+
+h) Does any of the data seem "out of place"? That is, are there any extreme outliers?
+
+```{asis solution=TRUE, language="asis", tags=c()}
+
+# YOUR CODE HERE
+
+```
+
+*Exercise 2*
+
+Now let's look at the longitude (a measure of east/west location on earth) and latitude variables (south/north location on earth) of "gta_rentals" dataset. These two columns provide the geo-spatial location of the apartments on the earth.
+
+Use ggplot(...) to create:
+a) Scatter plot of Latitude vs Longitude
+b) Histogram for the latitude data 
+c) Histogram for the longitude data
+d) Use the summary(...) R function to calculate some descriptive statistics of the latitude and longitude data.
+
+[Note: For histograms, add ,binwidth=1 outside of the aes() but inside the geom_FUNCTION() to set the bar widths to 1 in the histograms.]
+
+Add Code R chunk here to write the code. 
+```{r solution=TRUE, tags=c()}
+# YOUR CODE HERE
+```
+
+Use the scatterplot, histograms and summaries to answer the following questions.
+
+```{asis directions=TRUE, language="asis"}
+a) In terms of latitude (i.e. south/north), which range appears most common?
+    
+b) In terms of longitude (i.e. east/west), which range appears most common?
+    
+c) What are the mean and median latitude of an apartment in the data set?
+
+d) What are the mean and median longitude of an apartment in the data set?
+
+e) Does any of the data seem "out of place"? That is, are there any extreme outliers? What does this suggest about the data set claiming that the apartments are from the Greater Toronto Area?
+```
+
+```{asis solution=TRUE, language="asis", tags=c()}
+# YOUR CODE HERE
+```
+
+## PART 2 - FILTER(...) IN DPLYR
+
+The filter() function in the dplyr package allows for the filtering of observations based on their results. The general rule for functions is that the first component in the function is the dataset to be filtered followed by the arguments that the dataset is to be filtered by.
+
+*Example 1*
+
+Run the function, filter(google_play_store, Installs=="50,000,000+"), and analyze the outcome.
+
+```{r}
+filter(google_play_store, Installs=="50,000,000+")
+```
+
+Clearly, '==' refers to components equal to some data value/character.  There are other operators to consider in R, like:
+
+  equal                       ==
+  greater than                >
+  less than                   <
+  greater than or equal to    >=
+  less than or equal to       <=
+  not equal to                !=
+  
+There are also the following logical operators:
+
+  and                                   &
+  or (in one or both)                   |
+  exclusive or (in one but not both)    xor(...)
+  not                                   !
+  member of a group                     %in%
+
+*Example 2*
+
+Write the R functions for the following questions and analyze the results.
+
+a)  Filter all the records from google_play_store dataset that have "Rating" greater than or equal to 4.9.
+
+```{r}
+filter(google_play_store, Rating>=4.9)
+```
+
+b) Filter all the records from google_play_store dataset that have "Rating" greater than or equal to 4.9 and "Installs" == "50,000,000+" .
+
+HINT: When finding numeric results you can just use its value (for example, 4.9), but for a character, or string, you must enclose it in "" (double quotes) (for example, "50,000,000+"). The type of the variable you know, when you do glimpse(google_play_store).
+
+```{r}
+filter(google_play_store, Installs=="50,000,000+" & Rating>=4.9)
+```
+
+c) Filter all the records from google_play_store dataset that have either "Rating" less than 3.7 or "Installs" == "50,000,000+" but not both.
+
+```{r}
+filter(google_play_store, xor(Installs=="50,000,000+", Rating<3.7))
+```
+
+d) Filter all the records from google_play_store dataset that have "Rating" less than 3.7 and "Installs" == "50,000,000+" OR "Rating" is equal to 5 and "Installs" == "5,000+".
+
+```{r}
+filter(google_play_store, (Installs=="50,000,000+" & Rating<3.7) | (Installs=="5,000+" & Rating==5) )
+```
+
+*Exercise 3*
+
+Now, let's look at the baby_names.csv dataset (which you named baby_names above) to practice using the filter() function in dplyr.
+
+Write the R code for the following tasks:
+
+a)  Filter the baby_names dataset to list all the records where Name == "Emma".
+
+To write the R code, first insert a code chunk below, either by clicking on "Insert" along the toolbar and choose R or use the key combination "Ctrl+Alt+I".
+```{r solution=TRUE, tags=c()}
+# YOUR CODE HERE
+```
+
+b) Filter the dataset to list the Name == "Emma" during the year == 2012.
+
+Add Code R chunk here to write the code. 
+```{r solution=TRUE, tags=c()}
+# YOUR CODE HERE
+```
+c) Filter the baby_names dataset to list all of the years in which the name "Snow" appears. Try it again for "Khaleesi". Interesting results? [If you didn't watch "Game of Thrones" the results won't mean much to you :).]
+
+Add Code R chunk here to write the code. 
+```{r solution=TRUE, tags=c()}
+# YOUR CODE HERE
+# YOUR CODE HERE
+```
+d) Filter the dataset to list the observations when name is "Emma" and appears less than 10 times in a year or more than 100 times in a year.
+
+Add Code R chunk here to write the code. 
+```{r solution=TRUE, tags=c()}
+# YOUR CODE HERE
+```
+
+e)  Define a new dataset called specific_name that only includes the rows of the baby_names dataset where Name == "Emma". Once defined, use ggplot() and geom_point to plot the year vs the number of times the name appears, coloring the points by the Gender variable.
+
+Add Code R chunk here to write the code. 
+```{r solution=TRUE, tags=c()}
+specific_name <- NULL # YOUR CODE HERE
+specific_name
+# YOUR CODE HERE
+```
+
+## PART 3 - ARRANGE(...) IN DPLYR
+
+The arrange() function in the dplyr package allows for the re-ordering of observations based on their results. The first component in the function is the dataset to be re-ordered followed by the variable(s) that the dataset is to be re-ordered by.
+
+*Example 3*
+
+Run the R function, arrange(google_play_store, Rating), and analyze the outcome.
+
+```{r}
+arrange(google_play_store, Rating)
+```
+
+The results can also be listed in descending order using the desc(...) function. For example, enter arrange(google_play_store, desc(Rating)) and analyze the results.
+
+```{r}
+# To list the observations in descending order of Rating
+arrange(google_play_store, desc(Rating))
+```
+
+What if you have multiple observations with the same value (for example, Rating above)? A "tie-breaker" can be used i.e, another attribute/variable may be used. Try entering arrange(google_play_store, desc(Rating), desc(Reviews)) and analyze the result.
+
+```{r}
+arrange(google_play_store, desc(Rating), desc(Reviews))
+```
+
+*Exercise 4*
+
+Write R code to:
+
+a)  Sort the baby_names dataset by Count in descending order and find the name and the year of most used name and its gender.
+
+Add Code R chunk here to write the code. 
+```{r solution=TRUE, tags=c()}
+# YOUR CODE HERE
+# Most used name was Linda in the year 1947 for females.
+```
+
+b) Sort the baby_names dataset by Name (will sort automatically in alphabetical order), then by the number of times it is used (largest to smallest), and finally the Gender (in alpha order).
+
+Add Code R chunk here to write the code. 
+```{r solution=TRUE, tags=c()}
+# YOUR CODE HERE
+```
+
+c) Sort all missing values to the start in Rating column of google_play_store dataset.
+
+Add Code R chunk here to write the code. 
+```{r solution=TRUE, tags=c()}
+# YOUR CODE HERE
+```
+
+## PART 4 - PIPING
+
+It is now time to introduce another operator called the 'pipe' operator. It is denoted by |> and can be thought of as 'then' in a logical statement.
+
+*Example 4*
+
+Use pipe operator to filter the google_play_store set so that it displays the Apps with over 50,000,000 installations and then sorts them in descending order by their ratings try entering:
+
+```{r}
+google_play_store |>
+  filter(Installs=="50,000,000+") |>
+  arrange(desc(Rating))
+```
+
+*Exercise 5*
+
+Use pipe operator to filter the names dataset so that it only involves Name == "Emma" and then orders it with the year it appears most as the first entry.
+
+Add Code R chunk here to write the code. 
+```{r solution=TRUE, tags=c()}
+# YOUR CODE HERE
+```
+
+NOTE: Piping should be used whenever you want to incorporate multiple functions from the dplyr package in R.  For the remainder of this worksheet use |> whenever possible.
+
+## PART 5 - SELECT(...) IN DPLYR
+
+The select() function in the dplyr package allows for the extraction of columns from a dataset (this is vertical slicing of the dataset).  The first component in the function is the dataset to be re-ordered followed by the column(s) to be selected to be displayed/extracted.
+
+Selections implement a dialect of R where operators make it easy to select variables:
+
+  : for selecting a range of consecutive variables.
+
+  ! for taking the complement of a set of variables.
+
+  & and | for selecting the intersection or the union of two sets of variables.
+
+  c() for combining selections.
+
+*Example 5*
+
+Run the function select(google_play_store, Rating, Reviews) and analyze the outcome.
+
+```{r}
+select(google_play_store, Rating, Reviews)
+```
+
+There are many additional helper functions by which columns/variables can be selected.  Some examples are (substituting appropriately for the capitalizations):
+
+  VARIABLE_NAME_1:VARIABLE_NAME_2                         displays variables from first referenced to last
+  
+  -c(VARIABLE_NAME_1,VARIABLE_NAME_2)                     displays all variables except those listed
+  
+  starts_with("CHARACTER")                                displays variables starting with character
+  
+  ends_with("CHARACTER")                                  displays variables ending with character
+  
+  contains("SOME_VALUE_OR_CHARACTER_IN_VARIABLE")         displays variables with character referenced
+  
+  one_of(c("VARIABLE_NAME_1",...,"VARIABLE_NAME_n"))      displays variables in set
+  
+  all_of(c("VARIABLE_NAME_1",...,"VARIABLE_NAME_n")):     All names must be present, otherwise an out-of-bounds error is thrown.
+
+  any_of(c("VARIABLE_NAME_1",...,"VARIABLE_NAME_n")):     Same as all_of(...), except that no error is thrown for names that don't exist.
+
+  everything():                                          Matches all variables.
+
+  last_col():                                            Select last variable, possibly with an offset.
+
+*Example 6*
+
+Run the R function, select(google_play_store, starts_with("R")) and notice the similarity to the results above.
+
+```{r}
+select(google_play_store, starts_with("R"))
+```
+
+*Exercise 6*
+
+Practice using the select() function (and previously discussed functions along with piping) on the baby_names dataset by completing the following:
+
+a)  Display just the names, the years, and the number of times the names appear.
+
+Add Code R chunk here to write the code. 
+```{r solution=TRUE, tags=c()}
+# YOUR CODE HERE
+```
+b) Redo part i) using the -c(...) for "Id" and "Gender" feature.
+
+Add Code R chunk here to write the code. 
+```{r solution=TRUE, tags=c()}
+# YOUR CODE HERE
+```
+c) Filter the names dataset so that it only includes Name=="Emma" sorted by the count (in descending order) and excludes the ID column in the results (use the piping operator).
+
+Add Code R chunk here to write the code. 
+```{r solution=TRUE, tags=c()}
+# YOUR CODE HERE
+```
+## Part 6 - DISTINCT AND COUNT IN DPLYR
+
+The distinct() function will assist in finding at the rows containing distinct values (all columns or some specific columns). 
+
+The count() function allows in finding the number of rows that has the same values in given columns.
+
+*Exercise 7*
+
+Practice using the distinct() function on the baby_names dataset by completing the following:
+
+a)  Display just the distinct records in names and the years.
+
+Add Code R chunk here to write the code. 
+```{r solution=TRUE, tags=c()}
+# YOUR CODE HERE
+```
+b)  Display how many times names are used and arrange the count by descending. 
+
+Add Code R chunk here to write the code. 
+```{r solution=TRUE, tags=c()}
+# YOUR CODE HERE
+```
+## PART 7 - MUTATE(...) IN DPLYR
+
+The mutate() function in the dplyr package allows for the creation of new columns/variables using values from a dataset.  The first component in the function is the name of the dataset which is then followed by the definition of the new column/variable.
+
+*Example 7*
+
+Run the function, mutate(google_play_store, Rounded_Rating=round(Rating)) and analyze the outcome.
+
+```{r}
+mutate(google_play_store, Rounded_Rating=round(Rating))
+```
+We will get back to mutate and other functions in the next worksheet.
+
+## PART 8: DATA DRILLING AND TRANSFORMATION 
+
+So you've completed your initial investigation into the data and found that the bedrooms, bathrooms, and square footage data all seemed reasonable while the longitude, latitude, and price data contains outliers in terms of apartments for rent in the Greater Toronto Area by an average Ontarian. To present the data on an interactive map run the following code that tells us a better story. 
+
+```{r}
+#install.packages("leaflet", dependencies = TRUE) # Install it to see the interactive map
+library(leaflet)
+# Create the leaflet map
+leaflet(data = gta_rentals) %>% 
+  addProviderTiles(providers$OpenStreetMap) %>%  # Add a basemap
+  addCircleMarkers(
+    ~Longitude, ~Latitude,                        # Define the coordinates
+    radius = ~sqrt(Sq.Ft)/10,                     # Size by square footage, scaled down
+    popup = ~paste("Price: ", Price)              # Add popup for Price
+  )
+```
+
+We will now turn to dplyr to help us with these "questionable" variables.
+
+*Exercise 8*
+
+*The "Latitude and Longitude" Data Re-visited*
+
+Doing an internet search it is easy to find that the latitude and longitude on Toronto is approximately 43.7 degrees latitude (north/south), -79.4 degrees longitude (east/west).
+
+Use the gta_rentals <- mutate(...) function to create two new variables in the data set:
+
+- The first variable should be the difference between each apartment's latitude and Toronto's latitude (call the variable lat_diff)
+
+- The second variable should be similar to the first new variable but using each apartment's longitude (call it long_diff).
+
+Add Code R chunk here to write the code. 
+```{r solution=TRUE, tags=c()}
+gta_rentals <- NULL # YOUR CODE HERE
+gta_rentals
+```
+
+Again, doing a quick internet search will reveal that a 1 degree change in latitude is over 100 kilometers change in the distance while, at 79.4 degrees longitude, a 1 degree change is over 80 kilometres change in distance. Also, the Greater Toronto Area encompasses approximately 150 km west to east and 150 km north to south.
+
+Use the arrange(...) function to sort the gta_rentals, lat_diff and long_diff variable in order to give the answers to questions asked next.
+
+Add Code R chunk here to write the code. 
+```{r solution=TRUE, tags=c()}
+# YOUR CODE HERE
+```
+
+Modifying the arrange(...) function above as needed, how many apartments are:
+```{asis directions=TRUE, language="asis"}
+a) more than 1 degree (i.e. lat_diff > 1) or over 100 km north of Toronto?  
+
+b) more than 1 degree south of Toronto?  
+
+c) more than 2 degrees or over 160 km east of Toronto? 
+
+d) more than 2 degrees or over 160 km west of Toronto? 
+
+[Notice how far some are from Toronto: -34.68 degrees (or ~3000 km) west of Toronto is basically Calgary.]
+
+```
+
+Add Code R chunk here to write the code. 
+```{asis solution=TRUE, language="asis", tags=c()}
+# YOUR CODE HERE
+```
+```{asis directions=TRUE, language="asis"}
+Use the filter(...) function to redefine the gta_rentals data set (call the new data set gta_rentals_filtered) so that it only includes apartments within 1 degree latitude and 2 degrees longitude of Toronto's latitude and longitude stated above.  
+[Note: From here on out we will use the gta_rentals_filtered data set when referring to the data.]
+```
+
+Add Code R chunk here to write the code. 
+```{r solution=TRUE, tags=c()}
+gta_rentals_filtered <- NULL # YOUR CODE HERE
+dim(gta_rentals_filtered)
+```
+Re-create the scatterplot, histograms for the Latitudes and Longitudes in the filtered gta_rentals_filtered data set and use the summary function to calculate some descriptive statistics of the same data.
+
+[Note: Modify the binwidth for each histogram to suit the needs of the data.]
+
+Add Code R chunk here to write the code. 
+```{r solution=TRUE, tags=c()}
+# YOUR CODE HERE
+```
+Use the histograms and summaries to answer the following questions.
+```{asis directions=TRUE, language="asis"}
+a) How does the range of the new latitude variable compare to your answer in Exercise 2 above?
+    
+b) How does the range of the new longitude variable compare to your answer in  Exercise 2 above?
+    
+c) How do the mean and median of the new latitude variable compare to your answers in Exercise 2 above? 
+ 
+d) How do the mean and median of the new longitude variable compare to your answers in Exercise 2 above? 
+
+e) Looking at your answers to parts c) and d), which appears to be a more 'stable' measure of central tendency when dealing with non-symmetric data and/or outliers?    
+```
+
+Add Code R chunk here to write the code. 
+```{asis solution=TRUE, language="asis", tags=c()}
+# YOUR CODE HERE
+```
+*Exercise 9*
+
+The "Price" Data Re-visited*
+
+As discussed above, clearly the price data has some extreme outliers - most notably the apartment that could be rented for 65 dollars a month and the apartment that could be rented for 535,000 dollars a month.  If the data set is to represent apartment rentals in the GTA for an average resident of Ontario then those may be considered data entry errors.  
+
+Instead of removing the apartments with unusual prices, use the mutate(...) function to create a new variable (call it P) that replaces rental prices in gta_rentals_filtered that are less than 1000 dollars or greater than 4000 dollars in the data set with NA (the reason we may want to do this is so that the lat./long., number of bedrooms, etc. information is not lost from the gta_rentals_filtered data for these apartments).
+
+Note: When defining `P=` in the mutate(...) function, use `P=ifelse(...)` which has 3 components separated by commas:
+
+a) The first component in the ifelse() function is the data you want to exclude using operators like <,>,|,&,==, etc..
+
+b) The second component is the value to be assigned if the condition in the first component is satisfied (here: NA).
+
+c) The third component is the value to be assigned if the condition in the first component is not satisfied (here: keep the original price).
+
+Once created, sort the gta_rentals_filtered data set by the price variable in descending order to ensure that the unusual prices have been assigned NA.
+
+Add Code R chunk here to write the code. 
+```{r solution=TRUE, tags=c()}
+# YOUR CODE HERE
+```
+Now, create a histogram for the new variable P in gta_rentals_filtered (adjusting binwidth as necessary) and use the summary(...) function (include the standard deviation as was done for the Price variable in Exercise 3 above) to calculate some descriptive statistics of the P data.
+
+[Note: You will need to include `,na.rm=TRUE` in the `sd(...)` function so that R knows to ignore the NA values in P (na.rm means remove NA). The summary(...) function automatically excludes these values so its not necessary there.]
+
+Add Code R chunk here to write the code. 
+```{r solution=TRUE, tags=c()}
+# YOUR CODE HERE
+```
+Use the histogram and summary to answer the following questions.
+
+```{asis directions=TRUE, language="asis"}
+a) How does the range of the new monthly rental price variable P compare to the range of the price variable in Exercise 3?
+
+b) How do the mean and median of the new monthly rental price variable P compare to your answer in Exercise 3?
+
+c) Looking at your answers to parts a) and b), do they strengthen your argument for the "more stable" measure of central tendency?    
+```
+
+Add Code R chunk here to write the code. 
+```{asis solution=TRUE, language="asis", tags=c()}
+# YOUR CODE HERE
+```
+
+## PART 9: *MORE ON MULTI-VARIABLE VISUALIZATION *
+
+```{asis directions=TRUE, language="asis"}
+Now we have a data set that seems to reasonably represent the rental prices for an average Ontarian in the Greater Toronto Area, you should be asking yourself further questions about whether some of the variables have any sort of relationship between them. Let's start by visualizing the relationship between two or more variables. We will perform visualization now, a bit more stats in next section.
+
+- Choice of visualization depends on type of variables involved (keep an eye on the type of the variable in the examples)
+  + Categorical and continuous
+  + Categorical and categorical
+  + Continuous and continuous
+
+To add more dimensions/variable, we have used aesthetics viz. color, shape, size. These are matched to types of the variables, like alpha and size are used for continuous variable; shape for categorical and color can work with continuous and categorical. 
+```
+[Note: For the remainder of the worksheet, any mention of rental prices is referring to the new price variable P in the gta_rentals_filtered data set.]
+
+*Exercise 10*
+
+Create box plots of the number of bedrooms vs the P variable.
+
+Note, Include:
+
+a) `group=Bedrooms` within the `aes(...)` and
+b) `,varwidth=TRUE` outside the `aes(...)` but inside the `geom_FUNCTION(...)` function.
+
+```{r}
+gta_rentals_filtered$Bedrooms <- as.factor(gta_rentals_filtered$Bedrooms)
+gta_rentals_filtered$Dens <- as.factor(gta_rentals_filtered$Dens)
+#Don't change this line. For reasons that will be explained later in the course, we need to change the variable type for bedrooms before creating the boxplot.
+```
+Add Code R chunk here to write the code. 
+```{r solution=TRUE, tags=c()}
+# YOUR CODE HERE
+```
+Use the box plots to answer the following questions.
+
+```{asis directions=TRUE, language="asis"}
+a)  Looking at the number of bedrooms vs the rental prices it looks as though one of the box plots is showing some potential outliers?  If these are not to be considered data entry errors, what could these outliers represent in the data set?
+
+b) Notice that the box plots are also of varying width (this is a result of the varwidth=TRUE in the geom_FUNCTION(...) function).  What do you think the widths represent in the context of this problem?
+```
+
+Add Code R chunk here to write the code. 
+```{asis solution=TRUE, language="asis", tags=c()}
+# YOUR CODE HERE
+```
+*Exercise 11*
+ 
+Before we look at the scatter plot comparing this data, do you think there is an obvious relationship between rental prices and the distance (i.e. lat./long.) an apartment is away from Toronto's city center? Basically, form a hypothesis of what you think might be revealed.  
+
+[Your 'gut instinct' is probably that apartment prices are very expensive in the city center and gradually decrease the further away from the city center that the apartment is.  Let's check this out.]
+    
+Now create a scatter plot of apartment rental prices vs the latitudinal differences (i.e. lat_diff). 
+
+[Hint: Put the aes(...) in the ggplot(...) function (means it will apply to all 'geoms') and include +geom_smooth(method="lm") after geom_point(...) to include what's called the line of best fit. Also use `position="jitter"` parameter inside geom_point(...) function]]
+
+Add Code R chunk here to write the code. 
+```{r solution=TRUE, tags=c()}
+# YOUR CODE HERE
+```
+Answer the following:
+```{asis directions=TRUE, language="asis"}
+a)  Looking at the scatter plot, the line of best fit appears to be almost horizontal.  What does this tell you about the relationship between the prices and the latitudinal (north/south) differences?
+
+b)  There is some useful information in the scatter plot above, however. What does the scatter plot tell you about apartments for rent between 1000 dollars and 2000 dollars and their location relative to the city center?  What about apartments that are greater than 2500 dollars?
+```
+
+Add Code R chunk here to write the code. 
+```{asis solution=TRUE, language="asis", tags=c()}
+# YOUR CODE HERE
+```
+*Exercise 12*
+
+Now create a scatter plot of apartment prices vs their square footage (i.e. Sq.Ft). To reveal a little more information, colour the points in the plot by the number of bedrooms and size by the number of bathrooms that each apartment has.
+
+Add Code R chunk here to write the code. 
+```{r solution=TRUE, tags=c()}
+# YOUR CODE HERE
+```
+a)  Looking at the resulting scatter plot, does there appear to be much of a relationship between the apartment prices and their square footage?
+
+Add Code R chunk here to write the code. 
+```{asis solution=TRUE, language="asis", tags=c()}
+# YOUR CODE HERE
+```
+Let's take a look at the scatter plots of apartment prices vs square footage when we consider the number of bedrooms. To do this, add the function +facet_wrap(~Bedrooms) after the geom_point(...) function to create a scatter plot for each of 1 bedroom, 2 bedroom, and 3 bedroom apartments.
+
+[Note: Also include a line of best fit in each of the plots.]
+
+Add Code R chunk here to write the code. 
+```{r solution=TRUE, tags=c()}
+# YOUR CODE HERE
+```
+b) Looking at the individual scatter plots, is any further information revealed about the relationship between an apartment's price and its square footage?
+
+Add Code R chunk here to write the code. 
+```{asis solution=TRUE, language="asis", tags=c()}
+# YOUR CODE HERE
+```
+*Exercise 13*
+
+a) Create a boxplot to present if having a Den affect the Square Footage of the apartment?
+
+b) Create a stacked bar chart to present if there is any relationship between the number of bedrooms and the presence of a den in the GTA rental apartments?
+
+c) Create a plot to present what is the relationship between square footage and rental price for apartments with different numbers of bedrooms in the GTA rental market?
+
+[Hint: Use facet_wrap to split the plot into facet for given bedrooms.]
+
+Add Code R chunk here to write the code. 
+```{r solution=TRUE, tags=c()}
+# YOUR CODE HERE
+```
+That finishes this week's introduction to the ggplot2 and dplyr package in R - in my opinion, these are most useful packages for manipulating and transforming datasets to perform exploratory data analysis. In data science, the ability to "clean data" is essential and using this package can help you be successful in that task.
+
+A reminder that next week's lab will have two components:
+
+1)  During the first 45 minutes you will be completing an open book quiz in R on the content discussed in this file (so be sure to practice!).
+
+2)  The final 35 minutes we will practice using code related to concepts discussed in your most recent lectures (which you will then be quizzed on in the first 35 minutes of the following lab). Check MyLS to see what content will be covered.
+
+Enjoy the rest of the week!

@@ -1,0 +1,274 @@
+---
+title: "`dplyr`: Data Pliers in R"
+author: "Nadeem Hassan"
+subtitle: "I don't know where the `y` in `dplyr` comes from."
+output: pdf_document
+---
+
+```{r}
+# This should work if you've already ran `install.packages("tidyverse")` at some point.
+library(tidyverse)
+```
+
+Bascially, `dplyr` is a set of functions that help manipulate data into a form that's useful to us.
+
+## Why it's called the `tidyverse`
+
+A `data.frame` is basically a simple excel spreadsheet. A **tidy** data frame is defined as follows:
+
+- Columns represent variables.
+- Rows represent observations.
+
+We'll see throughout the course that this makes it very easy to manage - plots and summary statistics just work better with tidy data.
+
+For example, the `mpg` data are tidy:
+
+```{r}
+head(mpg)
+```
+
+The first row represents a single car. The first column is the manufacturer for that car. Each row is an obs, each column a measurement on that obs.
+
+Because of this, it's easy to make plots like this one from last class:
+
+```{r}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy, colour = class))+
+  facet_grid(rows = vars(drv), cols = vars(cyl)) +
+  theme_bw()
+```
+
+## Preliminary: the Pipe
+
+The "pipe" operator in R is `|>`. It takes whatever is on the left and puts it as the *first* argument of the function on the right.
+
+- `x |> f()` is equivalent to `f(x)`
+- `x |> f(y)` is equivalent to `f(x, y)`
+- `x |> f() |> g() |> h(y)` is equivalent to:
+  - `f(x) |> g() |> h()` 
+  - `g(f(x)) |> h()`
+  - `h(g(f(x)))`
+  - In other words, the pipe works left to right and evaluates the first function first, the second function second, etc.
+- `x |> f(y, z)` is equivalent to `f(x, y, z)`
+
+Like many things in R, this is a bizarre concept until you get used to it, then it becomes second nature.
+
+`dplyr` functions always take a data frame as the first argument and always result in a data frame. This makes them perfect for piping, since the LHS is the first argument (which `dplyr` functions expect to be data) and output a dataframe that can be used as the first argument in the next function!
+
+## `filter()`
+
+As you might expect, `filter()` filters the data. From the plot above, we saw that there appears to be two cars that had 5 cylinders. Let's find out what they were!
+
+```{r}
+# Only cars with five cylinders
+# Recall that "==" is a question (is this equal to that?)
+mpg |>
+  filter(cyl == 5)
+#filter(mpg, cyl == 5) # This is an equivalent (non-pipe) way to do this
+```
+
+Looks like there were actually 4, but the automatic and manual versions of the 2 cars had the same displacement, cty, and hwy fuel efficiency.
+
+We can filter multiple variables at once:
+
+```{r}
+# From the large faceted plot above, there are only
+# 4 cars with six cyls and drv of "r"
+# Note that the r needs to be in quotations since it's a value,
+# not an object in R.
+mpg |>
+  filter(cyl == 6, drv == "r")
+```
+
+Finally, we can look at all front-wheel drive cars (`drv == f`) and see which ones had either 5 *or* 8 cylinders:
+
+```{r}
+mpg |>
+  filter(cyl == 5 | cyl == 8, drv == "f")
+```
+
+In the code, we used the "`|`" to mean "or". Note that this bar has no relation to the one in the pipe (`|>`). 
+
+Compare the plot to the output above to make sure you understand what's going on. The code is essentially saying "5 cylinders *or* 8 cylinders, but either way it needs to be front wheel drive".
+
+The following are equivalent:
+
+```{r}
+# Generally the preferred way
+mpg |>
+  filter(cyl == 5 | cyl == 8, drv == "f")
+
+# This is fine for simple cases
+filter(mpg, cyl == 5 | cyl == 8, drv == "f")
+
+# The "&" symbol means that both must be true,
+# so we need brackets to ensure the comparison is done correctly.
+mpg |>
+  filter((cyl == 5 | cyl == 8) & drv == "f")
+```
+
+The last one required brackets to make sure the logic checks are done in the correct orderd. Try out the following on your own:
+
+- `TRUE` or `FALSE` (This one is already done for you below)
+- `TRUE` and `FALSE`
+- `TRUE` and `TRUE`
+- `FALSE` and `FALSE`
+- `TRUE` or `TRUE`
+
+For the next two, think really hard about what the result will be! Since the answer to the first one is hard to predict, *always use brackets*!
+
+- `TRUE` or `FALSE` and `FALSE`
+- (`TRUE` or `FALSE`) and `FALSE`
+
+```{r}
+TRUE | FALSE & FALSE
+TRUE | (FALSE & FALSE)
+```
+
+# Arrange
+
+The `arrange()` function is mostly for us squishy-brained humans to better understand the data. It arranges the data.
+
+The following code puts the columns in order according to the `cty` column. **IMPORTANT**: It does *not* change the original data!
+
+```{r}
+mpg |>
+  arrange(cty)
+```
+
+The first four rows are all `cty == 9`, then the next 5 rows that we see are cars with 11 mpg in city driving. However, for the cars with 11 mpg city, the `hwy` column is not in any particular order! Let's change that:
+
+```{r}
+mpg |>
+  arrange(cty, hwy)
+```
+
+Change the above code to then sort by `displ` as well. Try changing the order of `cty` and `hwy` and seeing what happens!
+
+To get them in descending order (it assumes you want lowest to highest by default), you wrap the variable name in `desc()`:
+
+```{r}
+# Only hwy is in descending order, cty is still ascending.
+mpg |>
+  arrange(cty, desc(hwy))
+```
+
+## The Power of the Pipe
+
+In all of the examples, I've used the pipe (`|>`). It probably seems unnecessary. However, the pipe allows for **pipelines**!
+
+```{r}
+mpg |>
+  filter(cyl == 5 | cyl == 8, drv == "f") |>
+  arrange(manufacturer, model, cty, hwy)
+```
+
+Once you understand the pipe, this is easy to understand the code:
+
+- We're using the `mpg` data set.
+  - We're taking that data and filtering it.
+  - We're then arranging alphabetically by manufacturer and model and by fuel efficiency.
+
+**Try**: What happens if you rearrange the lines in the code, i.e. if you arrange first?
+
+The following would be another way to do this. Would you want to read this code? How easy is it to tell that `manufacturer` is an argument to the `filter()` function?
+
+```{r}
+arrange(filter(mpg, cyl == 5 | cyl == 8, drv == "f"), manufacturer, model, cty, hwy)
+```
+
+## `select()`
+
+The `select()` function selects columns. This is useful if there are only a few columns that we actually care about.
+
+If we just wanted to look at the hwy and cty fuel efficiency, disregarding the rest of the data, we could do this:
+
+```{r}
+mpg |>
+  select(cty, hwy)
+```
+
+The above data makes it easy to do a quick eye-check and see that cty is lower than hwy, without any other columns cluttering our vision.
+
+As another example, if we filter so that we're only looking at Chevrolet Corvette cars, we don't need to see these two columns. The `select()` function can *remove* columns, while keeping all other columns.
+
+```{r}
+mpg |>
+  # All corvettes are chevys, don't need to filter on manufacturer as well
+  filter(model == "corvette") |> 
+  select(- manufacturer, - model)
+```
+
+## `mutate()` is the powerhouse of the code cell
+
+A lot of the time, you'll need to actually change the data. This is what `mutate()` does.
+
+For example, the displacement of the engine (`displ`) is in *litres*, whereas the rest of the data are in imperial units. Let's change this!
+
+In the code below, I *add* a new column, rather than changing the original. I then select the relevant columns so I can see that it worked the way I expected.
+
+```{r}
+mpg |>
+  mutate(displ_gallons = 0.2199693 * displ) |>
+  select(displ, displ_gallons)
+```
+
+**Try**: Is there now a column labelled `displ_gallons` in the `mpg` dataframe?
+
+```{r}
+# Find out here!
+```
+
+## Putting it all together
+
+The `mpg` data include the `cty` and `hwy` fuel efficiency, but most people just want to know the overall fuel efficiency. 
+
+The usual calculation for the overall fuel efficiency assumes that some will be driving in a city 55% of the time, and on the highway 45% of the time.
+
+With that in mind, let's make a plot of overall fuel efficiency versus engine displacement in litres. We'll remove the 5 cylinder cars because there are only 4 of them.
+
+```{r}
+mpg |>
+  filter(cyl != 5) |>
+  mutate(
+    fuel_efficiency = 0.45 * hwy + 0.55 * cty,
+    displ_gallons = 0.2199693 * displ
+  ) |>
+  ggplot(aes(x = displ_gallons, y = fuel_efficiency)) +
+    geom_point(aes(colour = factor(cyl))) +
+    geom_smooth(se = FALSE) +
+    facet_wrap(vars(drv)) +
+    theme_bw() +
+    labs(
+      x = "Displacement (Gallons)",
+      y = "Overall Fuel Efficiency (Miles per Gallon)",
+      colour = "Cylinders",
+      title = "Fuel Efficiency versus Engine Size"
+    )
+```
+
+- Do you think the "smooth" lines will continue into the future?
+  - If we add a front wheel drive (`drv == "f"`) car with an engine displacement of 1.5 gallons, will the smooth line look the same?
+  - For 4 wheel drive cars, will larger engine displacements continue to have higher and higher mpg?
+  - If we had more rear wheel drive cars, will that wonky smooth pattern still be there?
+
+**Try**: In the plot, there's one car in with `drv == "f"` and `cyl ==6` that seems to have a much lower `mpg` than the rest. What's that about? Fill in the code to see if you can gain any information.
+
+```{r}
+mpg |>
+  filter() |> # add filters
+  mutate(fuel_efficiency = 0.45 * hwy + 0.55 * cty) |>
+  arrange() # arrange appropriately
+```
+
+
+## Next Time
+
+We've seen some basic things that we can do with data, but this is far from the power that we're going to need to do data science. Next time, we'll cover Sections 3.5 qand 3.6 as well as Chapter 5 in the textbook:
+
+- Groupby and summarise
+  - What's the mean in each group?
+- Pivoting!
+  - How to get our data into a tidy form.
+
+While they won't be covered in any exam or assignment, it is 100\% worth your time to read through Chapters 2 and 4 of the textbook.

@@ -1,0 +1,68 @@
+---
+title: "Participation Quiz 06"
+author: "Nadeem Hassan"
+---
+
+<!-- # BEGIN ASSIGNMENT -->
+<!--
+# ASSIGNMENT CONFIG
+generate: true
+export_cell: false
+check_all_cell: false
+requirements: "requirements.R"
+overwrite_requirements: true
+environment: "environment.yml"
+-->
+
+```{r setup, include=FALSE, message=FALSE}
+library(tidyverse)
+```
+
+<!--
+# BEGIN QUESTION
+name: max_carat
+manual: false
+points: -1
+-->
+
+<!-- # BEGIN SOLUTION -->
+```{r max_carat, error=TRUE}
+(max_carat <- diamonds |>
+    # BEGIN SOLUTION
+    filter(cut == "Fair", clarity == "SI1") |>
+    top_n(1, carat)
+    # END SOLUTION
+)
+```
+<!-- # END SOLUTION -->
+
+<!-- # BEGIN TESTS -->
+```{r max_carat, error=TRUE}
+(max_carat_sol <- diamonds |>
+  filter(cut == "Fair", clarity == "SI1") |>
+  top_n(1, carat)
+)
+testthat:: expect_true(is_tibble(max_carat),
+  info = "ERROR FEEDBACK: Submission should be a tibble (the output of dplyr functions).")
+
+testthat::expect_equal(ncol(max_carat_sol), ncol(max_carat),
+  info = "ERROR FEEDBACK: Do not select columns.")
+
+testthat::expect_equal(nrow(max_carat_sol), nrow(max_carat),
+  info = "ERROR FEEDBACK: There should only be one row.")
+
+testthat::expect_equal(max_carat_sol$cut, max_carat$cut,
+  info = "ERROR FEEDBACK: Be sure to filter by Fair in the `cut` column.")
+
+testthat::expect_equal(max_carat_sol$clarity, max_carat$clarity,
+  info = "ERROR FEEDBACK: Be sure to filter by SI1 in the `clarity` column.")
+
+testthat::expect_equal(max_carat_sol$carat, max_carat$carat,
+  info = "ERROR FEEDBACK: This is not the highest carat diamond for the required cut and clarity.")
+
+testthat::expect_equal(max_carat_sol, max_carat,
+  info = "ERROR FEEDBACK: This is not the highest carat diamond for the required cut and clarity.")
+```
+<!-- # END TESTS -->
+
+<!-- # END QUESTION -->

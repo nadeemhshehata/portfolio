@@ -1,0 +1,163 @@
+---
+title: "DATA 100 Quiz 5"
+author: "Nadeem Hassan"
+---
+# Student Name: Nadeem Hassan
+N9093285
+
+# SETUP
+
+1) Run the following code to load the tidyverse package and:
+  
+  - import the "titanicf22.csv" dataset. This file contains the information about the passenger of Titanic ship. Once the code is run, the dataset can be referred to as "titanic" for the remainder of the quiz.
+
+```{r}
+# Run the following code -- DONOT make changes!
+library(tidyverse)
+
+titanic <- read_csv("https://raw.githubusercontent.com/sukhjitsehra/datasets/master/DATA100/Datasets/titanicf22.csv")
+
+glimpse(titanic)
+```
+
+*Question 1*
+
+i) Look at the titanic dataset, do you think it is tidy? 
+No, the dataset is not tidy
+
+_HINT: Use `View(DATASET_NAME)` To view the complete dataset._
+
+ii) What do the first three lines of the titanic dataset contains and which line represents the header of the dataset?
+
+Line 1: Contains some sample passengers and there class as just numbers a time and there gender and a few other pieces of information. Then values like "Unknown" or "NA," which serves no purpose in a structured dataset
+Line 2: Contains more placeholder or irrelevant data such as "NA" or another repeated line, possibly referring to passenger information or titles.
+Line 3: May begin to include partial data for the first actual observation but is mixed with unrelated or poorly structured content.
+
+
+iii) Does the titanic data load correctly? If not, would you like to reload the dataset again by passing additional parameters to `read_csv(...)` function. 
+no
+- Repeated Entries 
+- Empty Fields
+- Missing Headers
+- Irregular Structure
+
+
+_HINT: Use the `col_types="..."` parameter to ensure that "PassengerID" is defined as an integer number and `skip=NUMBER_OF_LINES` parameter to skip the lines in `read_csv(...)` function._ 
+
+_Points:_ [1, 2, 3]
+
+
+```{r}
+# i)
+
+View(titanic)
+
+# (1 mark) YOUR ANSWER whether the data is tidy: No
+```
+
+```{r}
+# ii)
+View(titanic)
+
+# (1 mark) YOUR ANSWER:
+#Line 1: Contains some sample passengers and there class as just numbers a time and there gender and a few other pieces of information. Then values like "Unknown" or "NA," which serves no purpose in a structured dataset
+#Line 2: Contains more placeholder or irrelevant data such as "NA" or another repeated line, possibly referring to passenger information or titles.
+#Line 3: May begin to include partial data for the first actual observation but is mixed with unrelated or poorly structured content.
+
+```
+
+```{r}
+# iii)
+# Reload the dataset: Use the "col_types=cols(COLUMN_NAME=col_integer())" parameter to ensure that "PassengerID" is defined as an integer number and "skip=NUMBER_OF_LINES" parameter to skip the lines in read_csv(...) function -- You need to replace "NUMBER_OF_LINES" using a proper number.
+
+titanic_corrected <- read_csv(
+  "https://raw.githubusercontent.com/sukhjitsehra/datasets/master/DATA100/Datasets/titanicf22.csv",
+  col_types = cols(PassengerID = col_integer()),
+  skip = 3  
+) # YOUR CODE HERE
+
+View(titanic_corrected)
+```
+
+*NOTE: The "titanic_corrected" dataset will be used for Question 2. If you are concerned that it hasn't been imported properly, please raise your hand so that we can confirm your work with IA before proceeding.*
+
+*Question 2*
+
+Let's start tidying the data, 
+
+i) Write R code to replace the 2nd, 3rd, and 4th columns (i.e. "1st Class", "2nd Class", and "3rd Class") in "titanic_corrected" dataset with 2 columns/variables called "Ticket" and "Passenger" using the `pivot_longer(...)` function and use a 'pipe' to `filter(...)` so that it excludes the "NA"s in the "Passenger" variable. Report the number of columns and observations in the dataset using `dim(...)` function.
+
+_HINT: `!is.na(COLUMN_NAME)` returns FALSE if it finds NA value and TRUE if it does not find it. This can be used with `filter(...)` function. You need to replace "COLUMN_NAME" appropriately. _
+
+_Points:_ 3
+
+```{r}
+# remember to use "titanic_corrected":
+pivot_lng_data <- titanic_corrected %>%
+  pivot_longer(
+    cols = c(`1st Class`, `2nd Class`, `3rd Class`),
+    names_to = "Ticket",
+    values_to = "Passenger"
+  ) %>%
+  filter(!is.na(Passenger)) # YOUR CODE HERE
+pivot_lng_data
+
+dimensions <- dim(pivot_lng_data) # YOUR CODE HERE
+dimensions
+```
+```{r}
+. = ottr::check("tests/q2i.R")
+```
+
+ii) Write R code to replace the "Gender.Age" and "Description" columns in `pivot_lng_data` dataset with 2 columns/variables called "Gender" and "Age" using the `pivot_wider(...)` function. Transform the "Age" variable into an integer type column using `transform(Age=as.integer(Age))` and arrange it using `arrange(...)` function by "Age" in descending order.
+
+_Points:_ 5
+
+```{r}
+# start from "pivot_lng_data":
+pivot_wd_data <- pivot_lng_data %>%
+  pivot_wider(
+    names_from = "Gender.Age",
+    values_from = "Description",
+    names_sep = "_",
+    values_fill = NA
+  ) %>%
+  transform(Age = as.integer(Age)) %>%
+  arrange(desc(Age)) # YOUR CODE HERE
+pivot_wd_data
+```
+```{r}
+. = ottr::check("tests/q2ii.R")
+```
+
+iii) Use `pivot_wd_data` dataset, report how many missing values are there in each column? Apply Last Observation Carried Forward (LOCF) to fill in NAs in "Age" column the `pivot_wd_data` dataset to create a new dataset `pivot_wd_data_2`.
+
+_HINT: `summarise_all(~sum(is.na(.)))` to get missing value counts for each column, and `gather(column, missing_count)` to report it by column._
+
+_Points:_ 4
+
+```{r}
+#a)
+missing_values <- pivot_wd_data %>%
+  summarise_all(~sum(is.na(.))) %>%
+  gather(column, missing_count) # YOUR CODE HERE
+missing_values
+
+#b)
+pivot_wd_data_2 <- pivot_wd_data %>%
+  fill(Age, .direction = "down") # YOUR CODE HERE
+pivot_wd_data_2
+```
+```{r}
+. = ottr::check("tests/q2iii.R")
+```
+
+That concludes the fifth quiz for DATA100. To hand in your quiz for grading:
+
+1) Make sure that you have not changed any of the given variable names.
+
+2) Once you have answered all the questions and finished working on RMD file, then do run the all code chunks in the Rmd file and save this file on your lab computer.
+
+3) Go to Gradescope lab quiz and upload this RMD file to the appropriate location. 
+
+That's it! Once submitted, proceed to this week's worksheet and work on it for the remaining part of the lab session. Although you may not finish it here today, you are expected to continue working on it throughout the week and to have a good understanding of the material by next week's quiz!

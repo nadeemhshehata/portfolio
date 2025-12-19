@@ -1,0 +1,61 @@
+---
+title: "P08"
+author: "Nadeem Hassan"
+---
+
+```{r active="", eval=FALSE}
+# BEGIN ASSIGNMENT 
+```
+```{r}
+# nothing to change here
+library(tidyverse)
+my_csv <- "
+name,student number,A1 Points Grade,A1 percent grade
+Devan,19,13,93
+Lilah,woof,0,0%
+Kausar,25002012,14,100
+Hilal,25002013,10,72
+Kimimela,25908328,13,93
+"
+```
+
+Reorder the following lines of code to make it work. *You do not have to write any new code*, nor do you have to change the indentation, just put the following lines in the correct order.
+
+**COPY AND PASTE THE FOLLOWING LINES INTO THE R CHUNK THAT SAYS # YOUR CODE HERE**, in the correct order.
+```
+read_csv(
+  ) |>
+  mutate(
+  ) |>
+    col_types = list(`student number` = col_character())
+    a1_percent_grade = parse_number(a1_percent_grade)
+    `student number` = ifelse(`student number` == "woof", NA, `student number`)
+  mutate(
+  )
+  janitor::clean_names() |>
+```
+
+```{r p09, error=TRUE}
+a1 <- my_csv |>
+  read_csv(
+    col_types = list(`student number` = col_character())
+  ) |>
+  mutate(
+    a1_percent_grade = parse_number(`A1 percent grade`), 
+    `student number` = ifelse(`student number` == "woof", NA, `student number`)
+  ) |>
+  janitor::clean_names() |>
+  mutate( a1_percent_grade_numeric = parse_number(`A1_percent_grade`),  
+    a1_percent_grade_display = `A1_percent_grade`
+  )
+a1
+
+
+```
+```{r}
+. = ottr::check("tests/p09.R")
+```
+
+```{r active="", eval=FALSE}
+# END ASSIGNMENT 
+```

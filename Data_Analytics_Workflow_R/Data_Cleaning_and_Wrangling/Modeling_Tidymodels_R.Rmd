@@ -1,0 +1,174 @@
+---
+title: "DATA 100 Quiz 7"
+author: "Nadeem Hassan"
+---
+# Student Name: Nadeem Hassan
+N9093285
+
+# SETUP
+
+1) Run the following code to load the tidyverse package.
+
+```{r}
+library(tidyverse)
+```
+
+2) Import the ebola_outbreak, olympic_games, and national_committee datasets.
+
+```{r}
+ebola_outbreak <- read_rds("https://github.com/sukhjitsehra/datasets/blob/master/ST362/ebola_outbreak.rds?raw=true")
+glimpse(ebola_outbreak)
+
+olympic_games <- read_csv("https://raw.githubusercontent.com/sukhjitsehra/datasets/master/DATA100/Datasets/Olympics.csv")
+glimpse(olympic_games)
+
+national_committee <- read_csv("https://raw.githubusercontent.com/sukhjitsehra/datasets/master/DATA100/Datasets/NationalCommittee.csv")
+glimpse(national_committee)
+```
+
+*Question 1*
+
+a) Write an R command to convert date from format "15 Dec, 2024" to "2024-12-15" format?
+
+b) Find the number of seconds between 8:30AM on Thursday, July 4th, 2024 and 4:30PM on Thursday, November 7th, 2024.
+
+c) Report the result if we try to add three months to date "November 30, 2024". Provide explanation on the result obtained.
+
+d) Use the `mutate()` and `monthwise = month(..., label = TRUE)` functions to create an additional variable "monthwise" in `ebola_outbreak` dataset that displays month (i.e. Jan, Feb, etc.) for each patient was hospitalized (i.e., the column "date_hospitalisation") and pipe it to create a bar plot of the "monthwise" variable.
+
+Report the name of the months that has a maximum and minimum number of hospitalizations. 
+
+_Points:_ 7
+
+```{r}
+#Part a)
+format_date <- as.Date("15 Dec, 2024", format = "%d %b, %Y") # YOUR CODE HERE
+format_date
+
+#Part b)
+start_date <- as.POSIXct("2024-07-04 08:30", format = "%Y-%m-%d %H:%M", tz = "UTC")
+end_date <- as.POSIXct("2024-11-07 16:30", format = "%Y-%m-%d %H:%M", tz = "UTC")
+seconds_between_dates <- as.numeric(difftime(end_date, start_date, units = "secs")) # YOUR CODE HERE
+seconds_between_dates
+
+#Part c)
+result <-ymd("2024-11-30") |> 
+  (\(date) date + months (3))()# YOUR CODE HERE
+result
+
+##### (1 Mark) Provide explanation on the result obtained for Part c):
+# Your answer here: When adding three months to November 30, 2024, the resulting date will depend on how the lubridate package handles month overflow. Since February has only 29 days in 2025 (leap year), the resulting date will be February 29, 2025.
+#
+
+#Part d)
+
+
+plot_monthwise <- ebola_outbreak |>
+  mutate(monthwise =  month(date_hospitalisation , label = TRUE)) |>
+  ggplot(aes(x = monthwise)) +
+  geom_bar()
+ 
+ # YOUR CODE HERE
+
+plot_monthwise
+
+#max_month <- ebola_outbreak %>% count(monthwise) %>% filter(n == max(n)) #%>% pull(monthwise)
+#min_month <- ebola_outbreak %>% count(monthwise) %>% filter(n == min(n)) %>% pull(monthwise)
+
+#list(max_month = max_month, min_month = min_month)
+
+##### (2 Marks) Report the name of the months that has a maximum and minimum number of hospitalizations. 
+# Your answer here:
+#Answers for Part d:
+# Maximum Hospitalizations: Name of the month with the highest count (from max_month) [1] Oct
+# 12 Levels: Jan < Feb < Mar < Apr < May < Jun < Jul < ... < Dec
+# 
+# Minimum Hospitalizations: Name of the month with the lowest count (from min_month).
+# [1] May
+# 12 Levels: Jan < Feb < Mar < Apr < May < Jun < Jul < ... < Dec
+
+```
+```{r}
+. = ottr::check("tests/q1.R")
+```
+
+*Question 2*
+
+a) Use the `right_join(...)` function to add all of the variables and observations from the "olympic_games" dataset to the "national_committee" dataset when the "Team" and "Country" are common in the datasets, pipe it to report the number of variables and observations in the dataset using `dim()` function.
+
+b) Use `semi_join(...)` and `count()` functions to count the name of the associations from the national_committee dataset for the countries whose National Olympic Committees were recognized during a year in which the Olympics took place.
+
+_Points:_ 4
+
+```{r}
+#Part a)
+rt_join_dim <-olympic_games %>%
+  right_join(national_committee, by = c("Team" = "Country")) %>%
+  dim()# YOUR CODE HERE
+rt_join_dim
+
+#Part b)
+olympic_years <- unique(olympic_games$Year)
+
+
+
+sm_join <- national_committee %>%
+  semi_join(olympic_games, by = "Year") %>%
+  count() # YOUR CODE HERE
+sm_join
+```
+```{r}
+. = ottr::check("tests/q2.R")
+```
+
+*Question 3*
+
+a) Create a new dataset called in_join that:
+
+ + uses an `inner_join(...)` function so that all of the variables and observations from both datasets are combined for the National Committees (NOC) that are common to both datasets
+
+ + and then use piping on the new dataset along with the `filter(...)` function so that only the names of the Asian Association (i.e. Association=="Asia") athletes are selected. 
+
+ + use piping along with `summarise(.by=..., Count=n())`, and `arrange(...)` functions to print the countries from Asian Association by descending order of number of athletes. 
+
+b) Create a new dataset called le_join that:
+
+  + uses the `left_join(...)` function to add all of the variables and observations from the "olympic_games" dataset to the "national_committee" dataset when the "Country" and "Team" are common in the datasets as in part a).
+
+  + and then use `summarise(.by=..., Average_wt = mean(Weight, na.rm = TRUE))`, and `arrange(...)` functions to print the associations by the descending order of average weight ("Average_wt") of athletes for each association. 
+
+_Points:_ 6
+
+```{r}
+#Part a)
+in_join <- national_committee %>%
+  inner_join(olympic_games, by = "NOC") %>%
+  filter(Association == "Asia") %>%
+  summarise(.by = Country, Count = n()) %>%
+  arrange(desc(Count)) # YOUR CODE HERE
+in_join
+
+#Part b)
+le_join <- national_committee %>%
+  left_join(olympic_games, by = c("Country" = "Team")) %>%
+  summarise(.by = Association, Average_wt = mean(Weight, na.rm = TRUE)) %>%
+  arrange(desc(Average_wt)) # YOUR CODE HERE
+le_join
+```
+```{r}
+. = ottr::check("tests/q3.R")
+```
+
+
+
+That concludes the 7th quiz for DATA100. To hand in your quiz for grading:
+
+1) Make sure you have not changed any of the given variable names.
+
+2) Once you have answered all the questions and finished working on the RMD file, then do run all the code chunks in the Rmd file and save this file on your lab computer.
+
+3) Go to the Gradescope lab quiz and upload this RMD file to the appropriate location. 
+
+That's it! Once submitted, proceed to this week's worksheet and work on it for the remaining lab session. Although you may not finish it here today, you are expected to continue working on it throughout the week and to have a good understanding of the material by next week's quiz!
+
+

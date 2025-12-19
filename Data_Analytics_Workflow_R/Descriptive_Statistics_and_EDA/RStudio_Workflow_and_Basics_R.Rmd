@@ -1,0 +1,477 @@
+---
+title: "DATA100 R Worksheet 1"
+author: "Nadeem Hassan"
+date: "Last compiled on `r format(Sys.time(), '%d %B, %Y')`"
+output:
+  html_document:
+    theme: readable
+    toc: yes
+    number_sections: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(include = TRUE)
+```
+
+**Creating DATA100 Lab Working Directory**
+  
+Use the following steps to setup RStudio working directory:
+ 1. Log in to WLU AVD, Create a sub-directory named "DATA100" folder in your OneDrive folder. 
+
+ 2. From RStudio, use the menu to change your working directory under Session -> Set Working Directory -> Choose Directory.
+ 
+ 3. Choose the directory you've just created in step 1.
+ 
+You will want to do this each time you open a DATA100 file in RStudio.
+
+**Motive**
+
+The motive of this worksheet is to introduce you to some of the basics commands in R and familiarize you with the `ggplot2` package that was introduced in the first two lectures.
+
+**Additional Notes**
+
+i) Any of the "white" areas in this file (called an R notebook or markdown file) are where text can be input into the document.
+
+ii) Any of the "grey" areas are where R code is entered (called "code chunks").  To execute any of the code chunks, push the run button (looks like a "play" button) in the top right of the code chunk. Alternatively, "Ctrl+Shift+Enter" will also run the code chunk.
+
+iii) Code chunks will always start with '''{r} and end with '''.  If necessary, to insert a code chunk you can click on "Insert" along the toolbar and choose R or "Ctrl+Alt+I".  For writing R code for exercises, you need to insert code chunks under the exercise question. 
+
+You should become familiar with reading the comments within the R function. This is usually where instructions and explanations are "hidden" on how to get the function to work. A comment in R script is preceded by a `\#' to ensure that the comment will not be read when the code is executed.
+
+BE SURE TO SAVE YOUR WORK AS YOUR PROGRESS THROUGH THIS FILE. IF YOU HAVE ANY QUESTIONS OR DIFFICULTIES WITH THE EXAMPLES AND EXERCISES, PLEASE EMAIL ME AT XMA@WLU.CA
+
+# PART 1 - Defining variables
+
+To assign a scalar (i.e. a number) or a vector (i.e. a list of numbers) a variable name in R simply use <- (less than symbol followed by minus symbol). In addition, vectors are defined using c(ELEMENTS_OF_VECTOR).  Putting all of this together: `VARIABLE_NAME <- c(ELEMENTS_OF_VECTOR)`  (or you could just put a single number instead of c(...) if its a scalar).
+
+**Example 1**
+
+Run the following code by clicking on the "play" button in the top right of the code chunk. The output will appear immediately after the chunk.  Notice that when X and Y are defined the results are only displayed by typing X or Y afterwards.
+
+```{r}
+X <- 2 #Assigns X the value of 2
+X #Displays X
+Y <- c(1,2,3,4) #Assigns the vector/list of numbers (1,2,3,4) to Y
+Y #Displays Y
+```
+
+**Exercise 1**
+
+Now try it yourself. Define P as the value -4 and Q as the vector (2,4,6,8) in the chunk below and then run the code.
+
+To write the R code, first insert a code chunk below, either by clicking on "Insert" along the toolbar and choose R or use the key combination "Ctrl+Alt+I".
+```{r solution=TRUE, tags=c()}
+# YOUR CODE HERE
+p<-(-4)
+q <- c(2,4,6,8)
+```
+
+Note: For vectors with a common increment (i.e. increase) in step-size - for example, Q above starts at 2 and increases by 2 units at each step - the command `seq(STARTING_VALUE, END_VALUE, INCREMENT_SIZE)` may be useful.  For Q it wouldn't be necessary to use but below you will find examples where it is indeed necessary.
+
+**Example 2**
+
+a) Define R as the vector from -99 to 99 by increments of 2.
+
+b) Define S as the vector from 200 to 57.5 where consecutive numbers have a difference of 7.5.
+
+
+```{r}
+R <- seq(-99,99,2) 
+R
+S <- seq(200,57.5,-7.5) 
+S
+```
+
+
+Vectors will be discussed in much greater detail later in the course.  For now, the commands above (and below in the document) are a sufficient introduction for their use within R.
+
+# PART 2 - Basic operations
+
+Below are basic operations that can be completed on scalars and vectors in R.  It is very important to note that the operations on vectors are "element by element" (e.g. Y+Q = (1,2,3,4)+(2,4,6,8) = (3,6,9,12)).  If vectors aren't the same length, a warning will appear but computation will still be completed (we'll take a further look at this in one of the following exercises).
+
+ - \+               addition
+  
+ - \-               subtraction
+  
+ - \*               multiplication
+  
+ -  /              division
+  
+ -  ^              exponentiation
+  
+ - sqrt(VARIABLE)  square root of variable
+
+**Example 3**
+
+Find each of the following by entering appropriate commands in the next code chunk. To reveal the 'math' in the code below for the first time, click on the code between the dollar signs.  For any further reveals, click on the 'down arrow' below and to the right of the code.  
+
+Note that f) involves vectors of different lengths (how is R determining the result?) and g) and h) involve both scalars and vectors.
+  
+  $$a)\> X+P \\ b)\>P^X \\ c)\>Q-Y \\d)\>Q\times Y\\e)\>\sqrt\frac{Y}{Q} \\f)\>R+S \\g)\>P\times S \\h)\>P^R$$
+
+
+```{r}
+#a)
+X+P
+#b)
+P^X
+#c)
+Q-Y
+#d)
+Q*Y
+#e)
+sqrt(Y/Q)
+#f)
+R+S
+#g)
+P*S
+#h)
+P^R
+```
+
+Note: In the output above, e-NUMBER or e+NUMBER is equivalent to the scientific notation 10^(-NUMBER) or 10^(+NUMBER), respectively.
+
+# PART 3 - Importing data
+
+Data from .xlsx, .csv, .txt files (and more) can be imported into R. How to import these datasets will be discussed in great detail at a future date.  For now, all you need to know is that we will be importing datasets in the form of what are called 'tibbles' using the 'tidyverse' package in R.  The tidyverse contains many sub-packages in R and will be used extensively in this course.
+
+Run the following code to load the tidyverse package.
+
+[Note: I hope you may have already installed "tidyverse" package on your computer. If you are loading it for the first time on your own laptop include the line `install.packages("tidyverse", dependencies = TRUE)` before the `library(tidyverse)` line in the following code.  Once you've installed the package on your computer, you will only need the `library(tidyverse)` command in the future. We are also using another "ggthemes" package for this worksheet]
+
+```{r}
+# install.packages("tidyverse", dependencies = TRUE) # To install the package "tidyverse", uncomment the line and click the play button.
+library(tidyverse)
+
+# install.packages("ggthemes", dependencies = TRUE) # Same for the package "ggthemes"
+library(ggthemes)
+```
+
+
+Now that the tidyverse package is installed and loaded, we can import datasets as tibbles into R. In general, the code used to import datasets is as follows:
+
+  DATASET_NAME <- read_csv("FILE_NAME.csv")  
+  
+The .csv files can also be download directly from URL, the code used to import the .csv datasets from URL is as follows:
+  
+  DATASET_NAME <- read_csv("URL") 
+  
+Note: Appropriately replace for the CAPITAL letters
+
+**Example 4**
+
+a)  Load the GooglePlayStore.csv dataset to RStudio using a URL and name it as "google_play_store".
+(https://raw.githubusercontent.com/sukhjitsehra/datasets/master/DATA100/GooglePlayStore.csv)
+
+b) Look at the first few records of the "google_play_store" dataset.
+
+HINT: To display the dataset, just type its name in the line after the importing command (in this case google_play_store) or type `View(DATASET_NAME)` to see full data in a different window. OR, use `glimpse(DATASET_NAME)` where you can see all variables and the first few observations of each variable.
+
+```{r}
+# a)
+URL <- ("https://raw.githubusercontent.com/sukhjitsehra/datasets/master/DATA100/Datasets/GooglePlayStore.csv")
+google_play_store <- read_csv(URL)
+
+# b)
+google_play_store # This would display the first 10 records of the dataset. 
+glimpse(google_play_store)
+```
+
+**Exercise 2**
+
+a) Import Netflix.csv from URL = https://raw.githubusercontent.com/sukhjitsehra/datasets/master/DATA100/Datasets/Netflix.csv into current R session and name it as netflix.
+
+b) Look at the first few records of the "netflix" dataset.
+
+c) Write your observations about the "netflix" dataset.
+
+Add Code R chunk here to write the code. 
+```{r solution=TRUE, tags=c()}
+# YOUR CODE HERE
+url <- ("https://raw.githubusercontent.com/sukhjitsehra/datasets/master/DATA100/Datasets/Netflix.csv")
+
+netflix <- read_csv(url)
+netflix
+glimpse(netflix)
+
+```
+
+```{solution TRUE, language="solution", tags=c()}
+# YOUR CODE HERE
+
+
+
+```
+# PART 4 - Simple functions
+
+R has some pre-defined functions that may be introduced to you throughout the term in DATA100.  A brief list of some of the commands are given below (by no means is this list even close to all of them).
+
+ - str(DATA_SET)                     
+ returns the structure information of the dataset i.e. names and types of the columns (variables) in the dataset)
+
+ - length(DATA_SET$VARIABLE_NAME)    
+ returns the length of a vector or variable
+  
+ - dim(DATA_SET)                     
+ returns the dimensions of a dataset (number of rows and columns)
+  
+ - class(DATA_SET$VARIABLE_NAME)     
+ returns the type of data that a variable is (numeric, string, etc.)
+  
+ - names(DATA_SET$VARIABLE_NAME)     
+ returns the names of headers in a dataset
+
+ - max(DATA_SET$VARIABLE_NAME)       
+ returns largest value of a variable
+ 
+ - min(DATA_SET$VARIABLE_NAME)       
+ returns smallest value of a variable
+  
+ - mean(DATA_SET$VARIABLE_NAME)      
+ returns the average value of a  variable
+  
+ - median(DATA_SET$VARIABLE_NAME)    
+ returns the "middle" value of a variable
+  
+ - sum(DATA_SET$VARIABLE_NAME)       
+ returns the sum of the values in a variable
+
+ - summary(DATA_SET$VARIABLE_NAME)   
+ returns summary statistics of a dataset (NOTE: VARIABLE_NAME not necessary)
+
+**Example 5**
+
+Apply some of the above commands on the "google_play_store" dataset. 
+Note: google_play_store is the dataset and the columns within the dataset are the variables. 
+
+```{r}
+str(google_play_store) # returns the structure of the dataset
+class(google_play_store$Rating) # returns the class of the Rating variable
+max(google_play_store$Price) # returns the maximum value of Price variable
+summary(google_play_store$Rating) # returns the five point summary of the Rating variable, along with NA's (would be discussed later)
+summary(google_play_store) # returns the summary of the all the variables in the dataset
+```
+
+**Exercise 3**
+
+Write R code for finding each of the following in the netflix dataset:
+a) dimensions of the dataset
+b) Maximum OpenPrice
+c) Smallest LowPrice
+d) The total number of Netflix stock trades made over its history.
+
+Add Code R chunk here to write the code. 
+```{r solution=TRUE, tags=c()}
+# YOUR CODE HERE
+dim(netflix)
+#na.rm means it will ignore any NA missing values
+max(netflix$OpenPrice, na.rm = TRUE)
+min(netflix$LowPrice, na.rm = TRUE)
+#netflix dataset contains 4183 rows,each row in the dataset represents a single stock trade
+nrow(netflix)
+
+
+```
+# PART 5 - FINDING DATA
+
+Once a dataset is defined in R, several commands can be used to find specific dataset variables. Below is a list of some of those commands (Here "a" represents the rows and can take value from 1,2,3,4,5,6....m and "b" represents columns and can take value from 1,2,3,4,5...n)).
+
+-  DATA_SET[a,b]    gives the value in row a, column b of a dataset 
+  
+-  DATA_SET[,b]     gives all rows and column b in a dataset
+  
+-  DATA_SET$VARIABLE_NAME[a:b]    gives the values of a variable from entry a to entry b
+  
+-  DATA_SET$VARIABLE_NAME[DATA_SET$VARIABLE_NAME>x]  lists the values of a variable greater than x
+  
+-  DATA_SET$VARIABLE_NAME[DATA_SET$VARIABLE_NAME==x] lists includes all the times a variable equals to x
+  
+-  length(DATA_SET$VARIABLE_NAME[DATA_SET$VARIABLE_NAME==x]) finds the number of times the variable equals x
+  
+-  DATA_SET$VARIABLE_NAME[DATA_SET$VARIABLE_NAME>x & DATA_SET$VARIABLE_NAME<y] lists values between x and y
+  
+-  which(DATA_SET$VARIABLE_NAME==x) gives the row(s) index in which x occurs (could also be >, etc.)
+
+**Example 6**
+
+Write R code to find each of the following by in the google_play_store dataset:
+
+a) Display the 100th record.
+b) Find the number of reviews in 2399th row and 4th column.
+c) Display the row(s) index(es) for which app rating is more than 4.9.
+
+```{r}
+#a) 
+google_play_store[100,]
+#b)
+google_play_store[2399,4]
+#c)
+which(google_play_store$Rating>4.9)
+```
+
+**Exercise 4** 
+
+Use the commands above to find each of the following in the netflix dataset.
+a) List the stock prices in the 1000th row.
+b) Find the price of the Netflix stock in the 3333rd row and 4th column.
+c) Find the total number of times that Netflix has been traded more than 10 million times in a day.
+
+Add Code R chunk here to write the code. 
+```{r solution=TRUE, tags=c()}
+# YOUR CODE HERE
+```
+# PART 6 - Data visualization & ggplot()
+
+Before we finish today's introduction to R, however, let's get familiar with data visualization in R using the ggplot2 package within the tidyverse. 
+
+The ggplot command has two main (of which only the CAPITALIZATIONS need to be changed based on individual needs):
+
+  1) ggplot(data=DATA_SET_NAME)  
+  
+      -> this tells R which dataset we are plotting from
+  
+  2) +geom_FUNCTION(mapping=aes(x=X_VARIABLE,y=Y_VARIABLE)) 
+  
+      -> this tells R the independent and dependent variable and additional features can also be added to the plot.  
+      
+Note that geom_FUNCTION can be one of many options.  Some common ones are:
+
+-  geom_bar        creates a bar chart (Note: only X_VARIABLE in aes)
+
+-  geom_histogram  creates a histogram (Note: only X_VARIABLE in aes)
+  
+-  geom_smooth     creates a smooth curve fitted to the data
+  
+-  geom_line       joins data points by line segments
+  
+-  geom_point      plots data as individual points
+  
+-  geom_boxplot    creates boxplots plots for discrete values vs discrete/continuous variables
+
+In the following examples and exercises, we will visualize the one-variable, two-variable relationships.
+
+**Example 7**
+
+Write R code for creating the following plots on the google_play_store dataset:
+
+a) Plot the Rating of apps using a bar chart.
+
+```{r}
+ggplot(data= google_play_store) + 
+  geom_bar(mapping=aes(x= Rating))
+```
+
+b) Create a scatter plot of Reviews variable (i.e. y-axis) vs Rating variable (i.e. x-axis). 
+
+```{r}
+ggplot(data= google_play_store) + 
+  geom_point(mapping=aes(x= Rating, y=Reviews))
+```
+c) Create a boxplot of Content_Rating variable (i.e. y-axis) vs Rating variable (i.e. x-axis).
+
+```{r}
+ggplot(data= google_play_store) + 
+  geom_boxplot(mapping=aes(x= Rating, y= Content_Rating))
+```
+
+**Exercise 5**
+
+Write R code for creating the following plots on netflix dataset:
+
+a) Plot the DailyChange variable using a bar chart.
+
+Add Code R chunk here to write the code. 
+```{r solution=TRUE, tags=c()}
+# YOUR CODE HERE
+```
+b) Plot the HighPrice variable (i.e. y-axis) vs VolumeStatus variable (i.e. x-axis) using a box plot.
+
+Add Code R chunk here to write the code. 
+```{r solution=TRUE, tags=c()}
+# YOUR CODE HERE
+```
+c) Plot the Volume variable(i.e. y-axis) vs HighPrice variable (i.e. x-axis)  as a smooth curve.
+
+Add Code R chunk here to write the code. 
+```{r solution=TRUE, tags=c()}
+# YOUR CODE HERE
+```
+We can add attributes/variables to the geom_FUNCTION command; specifically to the aes(...) component. Some examples of which are:
+
+  color=VARIABLE_NAME     adds same colour to points that have another variable in common (discrete)
+
+  color=VARIABLE_NAME     creates a plot for each set of points that have another variable in common (continuous)
+
+  size=VARIABLE_NAME      matches size of points that have another variable in common
+
+  shape=VARIABLE_NAME     displays the same shape to points that have another variable in common
+
+**Example 8**
+
+a) Create a scatter plot of Reviews variable (i.e. y-axis) vs Rating variable (i.e. x-axis) and color each point based on Content_Rating.
+
+```{r}
+ggplot(data = google_play_store) + 
+  geom_point(mapping=aes(x= Rating, y= Reviews, color= Content_Rating))
+```
+
+```{asis directions=TRUE, language="asis"}
+To set an aesthetic manually, set the aesthetic by name as an argument of your geom function; i.e., it goes outside of aes(...).
+```
+
+**Example 9**
+
+a) Create a scatter plot of Reviews variable (i.e. y-axis) vs Rating variable (i.e. x-axis) and color the each point to blue.
+
+```{r}
+ggplot(data= google_play_store) + 
+  geom_point(mapping=aes(x= Rating, y= Reviews), color= "blue")
+```
+
+**Exercise 6**
+
+Write R commands to:
+
+a) Plot the Volume variable (i.e. y-axis) vs HighPrice variable (i.e. x-axis) as points (scatter plot) and color the points by DailyChanges.
+
+Add Code R chunk here to write the code. 
+```{r solution=TRUE, tags=c()}
+# YOUR CODE HERE
+```
+b) Plot a line graph of ClosePrice variable (i.e. y-axis) vs OpenPrice variable (i.e. x-axis) and color by DailyChange.
+
+Add Code R chunk here to write the code. 
+```{r solution=TRUE, tags=c()}
+# YOUR CODE HERE
+```
+c) Create a density plot the HighPrice variable (x-axis) and VolumeStatus variable (as color and fill aesthetics). 
+
+[Hint: To adjust the transparency, use the alpha parameter which ranges from 0 (completely transparent) to 1 (completely opaque). The plot below has an alpha value of 0.3.]
+
+Add Code R chunk here to write the code. 
+```{r solution=TRUE, tags=c()}
+# YOUR CODE HERE
+```
+You can also combine plots by entering something of the form ggplot(...)+ geom_FUNCTION(...)+ geom_FUNCTION(...) provided the variables that you want to plot are similar.
+
+**Exercise 7**
+
+Combine the two plots (scatter plot and smooth curve), for scatterplot use Volume variable (i.e. y-axis) vs HighPrice variable (i.e. x-axis) ensuring that the points are coloured by their VolumeStatus and for smooth curve use Volume variable (i.e. y-axis) vs HighPrice variable (i.e. x-axis) and color the curve as red.
+
+Add Code R chunk here to write the code. 
+```{r solution=TRUE, tags=c()}
+# YOUR CODE HERE
+```
+Let's now enhance the plot above by adding labels using the labs(...) function, where `title` adds a title, `x` = "Highest Price Traded"  and `y` = "Number of shares traded" label the axes, and color define legend labels. Additionally, the scale_color_colorblind(...) function from the `ggthemes` package can make the color palette colorblind safe. Also, save the plot to the disk using ggsave(...) function to disk, named as "price_volume.png".
+
+Add Code R chunk here to write the code. 
+```{r solution=TRUE, tags=c()}
+# YOUR CODE HERE
+```
+That finishes this week's introduction to R along with the ggplot2 package! A reminder that next week's lab will have two components:
+
+  1) During the first 45 minutes, you will be completing an open-book quiz in R on the content discussed in this file. So, be sure to download R and RStudio (see DATA100 Weekly Lab Information on MyLearningSpace for links) onto your personal device(s), or log into WLU Virtual Computer Labs and practice!  
+  
+  2) In the final 35 minutes we will practice using code related to concepts discussed in the following two DATA100 lectures (which you will then be quizzed on in the first 45 minutes of the next lab). Check MyLS to see what content will be covered.
+
+

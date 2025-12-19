@@ -1,0 +1,148 @@
+---
+title: "DATA100 Quiz 1"
+author: "Nadeem Hassan"
+---
+# Student Name: Nadeem Hassan
+N9093285
+
+# IMPORTANT NOTE
+
+DO NOT CHANGE THE GIVEN VARIABLE NAME IN THIS QUIZ FILE. YOU MAY SCORE ZERO ON THIS LAB IF YOU CHANGE THE VARIABLE NAMES.
+
+# SETUP
+
+1) Save this .Rmd file (i.e. this R document) on your lab computer in Downloads folders.  Once saved, go to "Session -> Set Working Directory -> Choose Directory..." in the toolbar at the top of this page and navigate to your folder.
+
+2) Load the tidyverse package (which contains the ggplot2 package we will cover on today's quiz) by running the following code:
+
+```{r}
+#If you use the Virtual Computer Labs, tidyverse package is already installed in RStudio; if you use your own computer and haven't done so, please install tidyverse first before loading (by deleting the "#" sign in front of the line):
+
+#install.packages("tidyverse", dependencies = TRUE) 
+#You need to comment the above line after install tidyverse (by adding a "#" sign in front of the line).
+
+library(tidyverse)
+```
+
+# Load Dataset
+
+Import the dataset named Olympics.csv from the URL = "https://raw.githubusercontent.com/sukhjitsehra/datasets/master/DATA100/Datasets/Olympics.csv" into R session and call the dataset as olympic_games.
+
+```{r}
+
+URL <- "https://raw.githubusercontent.com/sukhjitsehra/datasets/master/DATA100/Datasets/Olympics.csv"
+olympic_games <- read_csv(URL, show_col_types = FALSE)
+
+glimpse(olympic_games)
+
+```
+# Question 1 
+
+Determine each of the following using the olympic_games dataset.
+
+a) Report the maximum height of athlete to compete in the olympic games.
+
+b) Report the average weight of an Olympic athlete.
+
+c) Report the median age of an Olympic athlete.
+
+d) Report the five-point summary of the height of athletes. [Hint: use `summary()` function.]
+
+e) Report the number of athletes who have competed in the Olympic games after the year 2010 (not including year 2010). [Hint: use `length()` function.]
+
+f) Report the number of athletes from United States to compete in the Olympic games. [Hint: Team == "United States", and use `length()` function.]
+
+g) How many different types of sports are there in the dataset? [Hint: Use `unique(DATASET$COLUMN_NAME)` when you have to find unique values in a column, then use `length()` function.]
+
+[Hint: Some data is missing in the dataset (denoted by NA in the cells). Use `na.rm=TRUE` within the commands in parts a) to c) to exclude the missing values, e.g., `max(DATASET$COLUMN_NAME, na.rm = TRUE)`.]
+
+_Points:_ 7
+
+```{r}
+# Part a)
+max_height <- max(olympic_games$Height, na.rm = TRUE) # YOUR CODE HERE
+max_height
+# Part b)
+average_weight <- mean(olympic_games$Weight, na.rm = TRUE) # YOUR CODE HERE
+average_weight
+# Part c)
+median_age <- median(olympic_games$Age, na.rm = TRUE) # YOUR CODE HERE
+median_age
+# Part d)
+five_point_summary <- summary(olympic_games$Height) # YOUR CODE HERE
+five_point_summary
+# Part e)
+num_athletes_2010 <- length(olympic_games$ID[olympic_games$Year>2010])
+num_athletes_2010
+# Part f)
+num_athletes_United_States <- length(olympic_games$Team[olympic_games$Team == "United States"]) # YOUR CODE HERE
+num_athletes_United_States
+# Part g)
+num_of_sports <- length(unique(olympic_games$Sport)) # YOUR CODE HERE
+num_of_sports
+```
+# Question 2
+
+Write R code to create plots using ggplot2 library from tidyverse.
+
+ggplot(data=DATA_SET_NAME): this tells R which dataset we are plotting from +
+geom_FUNCTION(mapping=aes(x=X_VARIABLE,y=Y_VARIABLE)):
+
+##  Q2.1
+
+Plot the age of athletes as a histogram using `geom_histogram()`. Once created, use the command `binwidth=5` (put it outside of the `aes()` component but within the `geom_FUNCTION()` command) to change the width of each bar to 5 for the weights.
+
+Note: A warning may appear (along with the plot) that R automatically removed any missing age values.
+
+_Points:_ 2
+```{r}
+hist_age <- ggplot(data=olympic_games)+
+geom_histogram(mapping=aes(x=Age), binwidth=5, na.rm = TRUE) # YOUR CODE HERE
+
+hist_age # display the plot created by your code above
+```
+# Q2.2
+
+Create a scatterplot that shows the relationship between the athlete heights (y-axis) vs their weights (x-axis) (as points, so use `geom_point()`), ensure the points are of the same colour when the "Medal" result is the same (i.e., colour by "Medal") and add a smooth curve uses heights on y-axis and their weights on x-axis using `geom_smooth()`.
+
+Note: A warning may appear (along with the plot) that R automatically removed any missing height/weight values.
+
+_Points:_ 2
+```{r}
+scatter_htwt <- ggplot(data=olympic_games)+
+geom_point(mapping=aes(x=Weight,y=Height,colour = Medal), na.rm = TRUE)+geom_smooth(mapping=aes(x=Weight,y=Height)) # YOUR CODE HERE
+
+scatter_htwt # display the plot created by your code above
+```
+# Q2.3 
+
+Recreate the plot in part (2.2), this time separating the plot into 2 individual plots sorted by the "Season" by adding `+ facet_wrap(~Season)` to your command in part (2.2).
+
+_Points:_ 3
+```{r}
+scatter_htwtse <- scatter_htwt + facet_wrap(~Season)  # YOUR CODE HERE
+
+scatter_htwtse # display the plot created by your code above
+```
+# Q2.4 
+
+Create a box plot for the distribution of ages (y-axis), categorized by the type of medal won (x-axis), and colour it by sex/gender type (i.e., `colour=Sex`).
+
+_Points:_ 3
+
+```{r}
+boxplot_age_medal <- ggplot(data=olympic_games)+
+geom_boxplot(mapping=aes(y=Age, x=Medal, colour = Sex), na.rm = TRUE) # YOUR CODE HERE
+
+boxplot_age_medal # display the plot created by your code above
+```
+
+This concludes the first quiz for DATA100! To hand in your quiz for grading:
+
+1) Make sure that you do not change the given variable names.
+
+2) Once you have answered all the questions and finished working on .RMD file, Save this file on your lab computer.
+
+3) Go to Gradescope lab quiz and upload this .RMD file to the appropriate location. 
+
+Once submitted, proceed to this week's worksheet and work on it for the remaining part of the lab session. Although you may not finish it here today, you are expected to continue working on it throughout the week and to have a good understanding of the material by next week's quiz!

@@ -1,0 +1,245 @@
+---
+title: "Faceting with ggplot2"
+author: "Nadeem Hassan"
+output:
+  html_notebook: default
+  pdf_document: default
+geometry: margin=1.75in
+---
+
+For best results, open this file in RStudio and click the button labelled "Visual" at the top left of the screen. It's even better if you keep it in the same folder as your other notes for this class!
+
+### Recap
+
+We need to run `install.packages("tidyverse")` **once**, then we load the package every time we start R:
+
+```{r}
+library(tidyverse)
+```
+
+We worked with the `mpg` data, which is built into `ggplot2`, which is a package that you get when you install `tidyverse`:
+
+```{r}
+glimpse(mpg)
+```
+```{r}
+mpg
+```
+
+-   `mpg` is the box that holds the data.
+
+-   `displ`, `hwy`, and `drv` are examples of columns within the data. R can't find these unless you tell it to look inside `mpg`.
+
+We also worked with the `palmerpenguins` data, but we're switching to `mpg` for this lesson.
+
+We slowly built up something like the following ggplot (note that I've made it a little bit better):
+
+```{r}
+ggplot(data = mpg) +
+    aes(x = displ, y = hwy, colour = drv) +
+    geom_point() +
+    geom_smooth(se = FALSE) +
+    labs(
+        x = "Engine Displacement",
+        y = "Highway Fuel Efficiency",
+        colour = "Drivetrain",
+        title = "Efficiency versus Engine Size",
+        subtitle = "As size increase, efficiency tends to decrease"
+    ) +
+    theme_bw()
+    
+```
+
+In class I'll talk for a while at this point. Take some notes here:
+
+-   
+
+-   
+
+-   
+
+-   
+
+-   
+
+-   
+
+-   
+
+### `facet_wrap()` with respect to a variable
+
+```{r}
+#| fig-height: 4
+#| fig-width: 7
+
+ggplot(data = mpg) +
+    geom_point(mapping = aes(x = displ, y = hwy, colour = drv)) +
+  
+    facet_wrap(~ cyl) +
+    theme_bw()
+```
+
+Why is there a `~` before the column name? It's complicated, but here's a simplified version:
+
+-   The name `cyl` is part of the `mpg` dataframe. It doesn't exist outside `mpg`.
+-   The `~` makes it a special kind of object called a **formula**. R won't search for things in the formula until later.
+-   `facet_wrap()` will tell R to look for `cyl` only when it needs to, and will direct it to the `mpg` dataframe.
+
+### `facet_grid()` with respect to two variables
+
+This generates a grid of plots, labelled across columns and rows by the values in the respective variable
+
+```{r}
+ggplot(data = mpg) +
+    geom_point(mapping = aes(x = displ, y = hwy, colour = class))+
+    #facet_grid(rows = vars(drv), cols = vars(cyl))
+    facet_grid(cyl~drv + fl) +
+    theme_bw()
+```
+
+### Try out on your own
+
+-   Use `facet_grid(. ~ cyl)` or `facet_grid(drv ~ .)` in the last code snippet to see what happens.
+-   Compare `facet_grid(. ~ cyl)` and `facet_wrap(~ cyl)`.
+-   With the various choices of `facet_grid()` in the last code snippet, try add `colour` representing `class` to the plot, and see if more information can be extracted just by looking.
+
+### More scatter plots
+
+General structure of `ggplot` calls:
+
+`ggplot(data = DATA) + GEOM_FUNCTION(mapping = aes(MAPPINGS))`
+
+The same scatter plot of `hwy` (highway mileage) v.s. `displ` (engine size)
+
+```{r}
+ggplot(data = mpg) +
+    geom_point(mapping = aes(x = displ, y = hwy)) +
+    theme_bw()
+```
+
+-   We'll use this as a basis.
+    -   Follow along in RStudio!
+
+### Including the `cty` (in-town mileage) variable
+
+-   Decorate the points differently according to its `cty` value, using one of the `aesthetics`.
+    -   Try `colour`, `shape`, `alpha` (shading), `size`
+
+```{r}
+# comment / uncomment the appropriate lines to test the corresponding aesthetics
+ggplot(data = mpg) +
+    theme_bw() +
+    # what's the difference with `colour = class`
+    geom_point(mapping = aes(x=displ, y = hwy, colour = cty))
+    # would it work?
+    #geom_point(mapping = aes(x=displ, y = hwy, shape = cty))
+    # how does this compare with `colour = cty`?
+    #geom_point(mapping = aes(x=displ, y = hwy, alpha = cty))
+    # talking about intuitive
+    #geom_jitter(mapping = aes(x=displ, y = hwy, size = cty), alpha=0.3)
+```
+
+Try out `shape` for the `drv` (drive train)
+
+-   overlapping points become evident
+-   use `xlim()` and `ylim()` to scale the part of plots for more details
+
+```{r}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x=displ, y = hwy, shape = drv)) +
+  ylim(10,20) +
+  xlim(5,6)
+```
+
+We can also try to `facet_` it
+
+```{r}
+# comment / uncomment the appropriate lines to test the corresponding aesthetics
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x=displ, y = hwy, shape = drv)) +
+  facet_wrap(~ drv)       # it works
+  #facet_grid(drv ~ .)     # this way seems to be better
+  #facet_wrap(drv ~ .)       # could this work as well?
+```
+
+Can change overall aesthetics as well. Combination of effects can be very fancy
+
+**Caution**: could go too far and end up with too much to handle
+
+```{r}
+# comment / uncomment the appropriate lines to test the corresponding aesthetics
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x=displ, y = hwy, shape = drv), colour='blue')
+  #geom_point(mapping = aes(x=displ, y = hwy, shape = drv), size=3, alpha=0.3)
+  #geom_point(mapping = aes(x=displ, y = hwy, colour = drv, fill=class), size=3, alpha=0.5, shape=21)
+```
+
+**Question**: What about overlapping points (*overplot*)?
+
+-   `jitter` them, with the `position` parameter
+-   or use `geom_jitter` directly
+    -   Rerun the code block to see that `jittering` really is *random*
+    -   Do not over-use `geom_jitter` unless it is necessary
+
+```{r}
+ggplot(data = mpg) +
+  #geom_point(mapping = aes(x=displ, y = hwy, alpha = cty), position='jitter')
+  geom_jitter(mapping = aes(x=displ, y = hwy, alpha = cty))
+```
+
+### Use `geom_smooth`
+
+There are different ways to present data graphically.
+
+Each function in the `geom_` family of functions in `ggplot2` is suitable in displaying some statistical property or properties. For instance
+
+-   `geom_point` gives raw concept of how data look like
+-   `geom_smooth` does statistics in the backstage, and outputs a *smooth* curve
+    -   illustrating trends, but can also be misleading taken alone
+
+```{r}
+# Did this before, here with jittering
+ggplot(data = mpg) +
+  geom_smooth(mapping = aes(x = displ, y = hwy)) +
+  geom_jitter(mapping = aes(x = displ, y = hwy))
+```
+
+**Comment**: Good coding style: *try not repeat*. The following is good, since it reduces repetition while achieving the same effects as above. Can do this because `ggplot` and `geom_` functions are implemented this way.
+
+```{r}
+ggplot(data = mpg, mapping = aes(x=displ, y=hwy)) +
+  geom_smooth() +
+  geom_jitter()
+```
+
+Aesthetics for `geom_smooth`
+
+-   `group` data points by values in a `categorical` variable, and do stats separately to generate separate curves
+-   `linetype`, similar to `group` and changes the type of line used
+-   `colour`, similar to `group` and changes the colour of line used
+
+**Caution**: Could end up with too much to handle
+
+```{r}
+# comment / uncomment the appropriate lines to test the corresponding aesthetics
+ggplot(data=mpg, mapping = aes(x=displ, y=hwy)) +
+  #geom_smooth(mapping = aes(group = drv)) #+
+  geom_smooth() +
+  geom_jitter(aes(size = cty), alpha = 0.3) +
+  facet_wrap(~drv)
+  #facet_grid(drv~.)
+```
+
+If only want the smooth line (without the shades) can use `se=FALSE`
+
+-   this gets rid of the shades around the curve, which represents the uncertainty of the estimates
+-   more precisely, it relates to the notion of `confidence interval` -- which will be in your stats course
+
+Use `?geom_smooth` in `Console` to see more details.
+
+```{r}
+ggplot(data = mpg, mapping = aes(x=displ, y=hwy)) +
+  #geom_smooth(mapping = aes(group = drv)) +
+  geom_smooth(mapping = aes(linetype = drv), se=FALSE) +
+  geom_jitter(mapping=aes(colour=drv))
+```

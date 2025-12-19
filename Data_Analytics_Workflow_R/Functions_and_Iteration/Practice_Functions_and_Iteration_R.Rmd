@@ -1,0 +1,113 @@
+---
+title: "P16"
+author: "Nadeem Hassan"
+---
+
+```{r active="", eval=FALSE}
+# BEGIN ASSIGNMENT 
+```
+The Fibonacci sequence is calculated as follows: 
+
+F(x) = F(x - 1) + F(X - 2)
+
+where F(1) = 1 and F(2) = 1, so you only have to start calculating from x = 3. For example, the first 10 numbers in the Fibonacci sequence are:
+
+1 1 2 3 5 8 13 21 34 55
+
+Calculate the `n`th Fibonacci numbers using a function with a for loop inside it. The autograder will check if there's a function called "`fibonacci`" (R is case sensitive) that takes an argument "`n`". It will also check that `fibonacci(3)` gives a 2, `fibonacci(4)` gives a 3, etc.
+
+- Make sure your function is called `fibonacci` and takes one argument named `n`
+- Make sure it returns *one* number (not the whole sequence). 
+- Do not worry about making sure it works for n = 1 or n = 2, and don't worry about any other sort of error checking. 
+  - Error checking is good practice for other functions, but won't affect your submission here.
+
+```{r p16, error=TRUE}
+# YOUR CODE HERE
+fibonacci <- function(n) {
+  if (n == 1 || n == 2) return(1)
+  
+  a <- 1
+  b <- 1
+  current <- 0
+  
+  for (i in 3:n) {
+    current <- a + b
+    a <- b
+    b <- current
+  }
+  
+  return(current)
+}
+
+fibonacci(n = 10)
+```
+```{r}
+. = ottr::check("tests/fibby.R")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+It is well known that the ratio between [two consecutive Fibonacci numbers](https://en.wikipedia.org/wiki/Golden_ratio#Relationship_to_Fibonacci_and_Lucas_numbers) approaches the golden ratio:
+$$
+\phi = \frac{1 + \sqrt{5}}{2} = 1.618033988749
+$$
+
+Show this! Use a loop of some sort to calculate the ratio of $F(n) / F(n - 1)$ until we're "close enough", i.e. $|F(n) / F(n - 1) - \phi| < \epsilon$ for some small epsilon.
+
+In other words, find `n` such that `abs(fibonacci(n) / fibonacci(n - 1) - golden_ratio) < 1e-100`. The autograder will search for an object named "`n`" with the correct answer.
+
+(Note that `1e-100` is computer notation for 10^-1000, that is, a zero, then a decimal, then 99 zeros and then finally a 1.)
+
+```{r gr, error=TRUE}
+golden_ratio <- (1 + sqrt(5)) / 2
+n <- 2
+
+# Write some code to find the smallest n such that abs(fibonacci(n) / fibonacci(n - 1) - golden_ratio) < 1e-100
+# YOUR CODE HERE
+while (abs(fibonacci(n) / fibonacci(n - 1) - golden_ratio) >= 1e-100) {
+  n <- n + 1
+}
+n
+```
+```{r}
+. = ottr::check("tests/golden_ratio.R")
+```
+
+Fun fact: because of this fact, consecutive Fibonacci numbers can be used to convert from kilometers to miles! 
+
+- 1 2
+  - 1 mile is approximately 2 kilometers (1.609km, to be precise)
+  - 2 kilometers is approximately 1 mile (1.247mi, to be precise)
+- 2 3
+  - 2mi is approx 3km (3.219)
+  - 3km is approx 2mi (1.864)
+- 3 5
+  - 3mi is approx 5km (4.82)
+  - 5km is approx 3mi (3.11)
+- 5 8
+- 8 13
+- 13 21
+  - 13mi is approx 21km (20.92)
+  - 21km is approx 13mi (13.04)
+
+Why is this true? Because 1mi / 1km = 1.608, which is close to the Golden Ratio (1.618). 
+
+Next time you're travelling in the US, just open up R and write a while loop to find Fibonacci numbers that match the distance you need! (Or just trust your GPS, but I like the R approach.)
+
+```{r active="", eval=FALSE}
+# END ASSIGNMENT 
+```

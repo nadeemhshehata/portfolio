@@ -1,0 +1,87 @@
+---
+title: "P08"
+author: "Nadeem Hassan"
+---
+
+<!-- # BEGIN ASSIGNMENT -->
+<!--
+# ASSIGNMENT CONFIG
+generate: true
+export_cell: false
+check_all_cell: false
+requirements: "requirements.R"
+overwrite_requirements: true
+environment: "environment.yml"
+-->
+
+<!--
+# BEGIN QUESTION
+name: p08
+manual: false
+points:
+  - 1
+-->
+
+<!-- # BEGIN SOLUTION -->
+```{r}
+library(tidyverse)
+billboard_longer <- billboard |>
+    # BEGIN SOLUTION
+  pivot_longer(
+    cols = starts_with("wk"),
+    names_to = "week",
+    values_to = "position"
+  )
+    # END SOLUTION
+
+billboard_longest_top_10 <- billboard_longer |>
+    # BEGIN SOLUTION
+  mutate(week = parse_number(week)) |>
+  group_by(track, artist) |>
+  filter(position <= 10) |>
+  summarise(number_of_weeks = n()) |>
+    # END SOLUTION
+  arrange(desc(number_of_weeks))
+```
+<!-- # END SOLUTION -->
+
+
+<!-- # BEGIN TESTS -->
+```{r}
+billboard_longer_sol <- billboard |>
+  pivot_longer(
+    cols = starts_with("wk"),
+    names_to = "week",
+    values_to = "position"
+  )
+
+billboard_longest_top_10_sol <- billboard_longer_sol |>
+  mutate(week = parse_number(week)) |>
+  group_by(track, artist) |>
+  filter(position <= 10) |>
+  summarise(number_of_weeks = n()) |>
+  arrange(desc(number_of_weeks))
+
+billboard_longer_sol <- billboard |>
+  pivot_longer(
+    cols = starts_with("wk"),
+    names_to = "week",
+    values_to = "position"
+  )
+
+billboard_longest_top_10_sol <- billboard_longer_sol |>
+  mutate(week = parse_number(week)) |>
+  group_by(track, artist) |>
+  filter(position <= 10) |>
+  summarise(number_of_weeks = n()) |>
+  arrange(desc(number_of_weeks))
+
+testthat::expect_equal(billboard_longer_sol,
+  billboard_longer_sol,
+  info = "ERROR FEEDBACK: Solution is wrong.")
+```
+<!-- # END TESTS -->
+
+<!-- # END QUESTION -->
+
+<!-- # END ASSIGNMENT -->

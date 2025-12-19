@@ -1,0 +1,188 @@
+---
+title: "DATA 100 Quiz 2"
+author: "Nadeem Hassan"
+---
+## Student Name: Nadeem Hassan
+N9093285
+
+## IMPORTANT NOTE
+
+DO NOT CHANGE THE GIVEN VARIABLE NAME IN THIS QUIZ FILE. YOU MAY SCORE ZERO ON THIS LAB IF YOU CHANGE THE VARIABLE NAMES. 
+
+## SETUP
+
+1) Save this .Rmd file (i.e. this R document) on your lab computer in Downloads folders.  Once saved, go to "Session -> Set Working Directory -> Choose Directory..." in the toolbar at the top of this page and navigate to your folder.
+
+2) Load the tidyverse  (which contains the ggplot2 package we will cover on today's quiz) package. Also, load the data "Olympics.csv" and "airbnb_data.csv" for Toronto, Canada dataset by running the following code:
+
+```{r}
+library(tidyverse)
+
+olympic_games <- read_csv("https://raw.githubusercontent.com/sukhjitsehra/datasets/master/DATA100/Datasets/Olympics.csv", show_col_types = FALSE)
+
+airbnb_data <- read_csv("https://raw.githubusercontent.com/sukhjitsehra/datasets/master/DATA100/Datasets/airbnb_data.csv", show_col_types = FALSE)
+```
+
+Using the olympic_games dataset to answer the following question 1 and 2:
+
+## Question 1
+
+Complete the following tasks using piping when appropriate:
+
+a) Report the dimensions (number of observations and columns) of olympic_games dataset.
+  
+b) Report the name of athletes (in descending order by Age) and the sports they participated in. [Hint: the final results should include only Name, Age, and Sport.]
+
+c) Report the count of the number of "Canadian" athletes that have won a gold medal since 1999 (1999 included). 
+
+[Hint: Use count() function to count the number of observations in the piped commands from LHS]
+
+_Points:_ 5
+
+```{r}
+#Part a)
+# find the dimensions of the olympic_games dataset and assign it to the variable below:
+dimensions <-  dim(olympic_games) # YOUR CODE HERE
+dimensions
+#olympic_games
+#airbnb_data
+
+#Part b)
+# arrange the olympic_games dataframe by age and assign it to the variable below:
+ordered_by_age <- olympic_games |>
+  select(Name, Age, Sport) |>
+  arrange(desc(Age)) # YOUR CODE HERE
+ordered_by_age
+
+#Part c)
+# filter the olympic_games dataframe by given criterion and count the observations using pipes and assign the result to gold_medal_count variable below:
+gold_medal_count <- olympic_games |>
+  filter(Team == "Canada", Medal == "Gold", Year >= 1999) |>
+  count() # YOUR CODE HERE
+gold_medal_count
+```
+```{r}
+. = ottr::check("tests/q1.R")
+```
+
+## Question 2 
+
+Complete the following tasks using piping when appropriate:
+
+a) What is median age of the male athletes in Olympic games
+
+[HINT: As some data is missing for "Age" column, be sure to include `, na.rm=TRUE` in median(...) function]
+
+b) Count all the data for athletes that participated in the "Vancouver" Olympics.
+
+c) Find all female athletes who have participated in ice hockey in the Olympics, sort the results in alphabetical order by their team first then their names. From the result, report the athletes names along with their team and medal.
+
+[HINT: You may add select(...) to view only "Name", "Team", and "Medal"]
+
+_Points:_ 5
+
+```{r}
+#Part a) 
+# filter the olympic_games dataset by male (males_data_filtered) and then use median(...) function on Age column, and assign the result to variable below:
+males_data_filtered <- olympic_games|>
+  filter(Sex == "M")# YOUR CODE HERE
+
+med_age <- median(males_data_filtered$Age, na.rm = TRUE) # YOUR CODE HERE
+med_age
+
+#Part b)
+# filter the olympic_games dataset by city, then count the observations and assign the result to variable below:
+ath_count_vancouver <- olympic_games |>
+  filter(City == "Vancouver") |>
+  count() # YOUR CODE HERE
+ath_count_vancouver
+
+#Part c) 
+# filter the olympic_games dataset by the criteria, the arrange the dataset, you can use select to display asked columns only and assign the result to variable below:
+fem_att_ice <- olympic_games |>
+  filter(Sex == "F", Sport == "Ice Hockey") |>
+  arrange(Team, Name) %>%
+  select(Name, Team, Medal) # YOUR CODE HERE
+
+fem_att_ice
+```
+```{r}
+. = ottr::check("tests/q2.R")
+```
+
+Using the airbnb dataset to answer the following question 3:
+
+## Question 3
+
+Complete the following tasks using piping when appropriate:
+
+a) What are the top 5 most expensive listings? Display their id, name, neighbourhood, and price.
+
+b) Visualize the distribution (histogram) of prices for listings that have more than 75 but less than 100 reviews.
+
+c) Create a scatter plot showing the relationship between latitude (y-axis) and longitude (x-axis), and colour it by room_type. Separate the plot into four individual plots sorted by the "room_type" by adding + facet_wrap(~room_type) to your command. What do you witness about the "Hotel room" category plot?
+
+d) Identify listings with zero availability for the next 365 days but have received more than 5 reviews in the last 12 months (number_of_reviews_ltm). Display their id, name, and number_of_reviews_ltm.
+
+e) Create boxplot that compares the price distribution for various room_type categories. Present the boxplots horizontally using coord_filp() and colour the boxplots by room_type. Ensure to filter out prices above 500 to exclude most outliers in prices. 
+
+_Points:_ 10
+
+```{r}
+#a) Select id, name, neighbourhood, and price columns and sort by desc(price) and pipe it to display top 5 using `head(COUNT)` function below:
+
+top_expensive_listings <- airbnb_data|>
+  select(id, name, neighbourhood, price) |>
+  arrange(desc(price)) %>%
+  head(5) # YOUR CODE HERE
+top_expensive_listings
+```
+```{r}
+#b) Create a plot to visualize the distribution (histogram) of prices for listings by filtering the data that have more than 75 but less than 100 reviews.
+
+distribution_plot <- airbnb_data|>
+  filter(number_of_reviews > 75, number_of_reviews < 100) |>
+  ggplot(aes(x = price)) +
+  geom_histogram(binwidth = 10, fill = "blue", color = "black") 
+ # YOUR CODE HERE
+distribution_plot
+```
+```{r}
+#c) Create scatter plot between latitude (y-axis) and longitude (x-axis), colour it by room_type
+scatter_plot <- airbnb_data|>
+  ggplot(aes(x = longitude, y = latitude, color = room_type)) +
+  geom_point() +
+  facet_wrap(~ room_type) + 
+  labs(title = "Scatter plot of listings by room type", x = "Longitude", y = "Latitude") # YOUR CODE HERE # YOUR CODE HERE
+scatter_plot
+```
+```{r}
+#d)  Filter data to present listings with zero availability for the next 365 days (i.e., availability_365 == 0) and more than 5 reviews (i.e., number_of_reviews_ltm > 5). Display their id, name, and number_of_reviews_ltm.
+zero_availability_high_reviews <- airbnb_data |>
+  filter(availability_365 == 0, number_of_reviews_ltm > 5) %>%
+  select(id, name, number_of_reviews_ltm) # YOUR CODE HERE
+zero_availability_high_reviews
+```
+```{r}
+#e) Filter data on price to exclude any price above 500 and create boxplot that compares the price distribution for various room_type categories
+box_plot <- airbnb_data |>
+  filter(price <= 500) |>
+  ggplot(aes(x = room_type, y = price, colour = room_type)) +
+  geom_boxplot() +
+  coord_flip() + 
+  labs(title = "Price Distribution by Room Type", x = "Room Type", y = "Price") # YOUR CODE HERE
+box_plot
+```
+```{r}
+. = ottr::check("tests/q3.R")
+```
+
+This concludes the 2nd quiz for DATA100! To hand in your quiz for grading:
+
+1) Make sure that you do not change the given variable names.
+
+2) Once you have answered all the questions and finished working on .RMD file, save this file on your lab computer.
+
+3) Go to Gradescope lab quiz and upload this .RMD file to the appropriate location. 
+
+That's it! Once submitted, proceed to this week's worksheet and work on it for the remaining part of the lab session. Although you may not finish it here today, you are expected to continue working on it throughout the week and to have a good understanding of the material by next week's quiz!
